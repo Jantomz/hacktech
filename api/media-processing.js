@@ -1,10 +1,10 @@
 import ffmpeg from "fluent-ffmpeg";
-import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
+import ffmpegPath from "ffmpeg-static"; // <- note change
 import { tmpdir } from "os";
 import { join } from "path";
 import fs from "fs";
 
-ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 export default async function handler(req, res) {
     if (req.method !== "POST") {
