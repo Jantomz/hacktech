@@ -17,29 +17,12 @@ import { DocumentProcessor } from "@/components/budget/DocumentProcessor";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, Share } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { GoogleLogin } from "@react-oauth/google";
-import axios from "axios";
 
 // TODO: Change the backend url
 
 const Dashboard = () => {
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState("overview");
-
-    const onSuccess = async (credentialResponse) => {
-        console.log(credentialResponse);
-
-        // Send the credential (id_token) to your backend to exchange for Gmail access
-        await axios.post("/api/auth/google", {
-            credential: credentialResponse.credential,
-        });
-
-        alert("Signed in and backend has your token!");
-    };
-
-    const onError = () => {
-        console.log("Login Failed");
-    };
 
     return (
         <AppLayoutWrapper>
@@ -49,7 +32,6 @@ const Dashboard = () => {
                         <h1 className="text-3xl font-bold mb-2">
                             Budget Dashboard
                         </h1>
-                        <GoogleLogin onSuccess={onSuccess} onError={onError} />
                         <p className="text-muted-foreground">
                             Interactive visualizations of your government's
                             budget data

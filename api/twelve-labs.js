@@ -14,11 +14,13 @@ export default async function handler(req, res) {
     formData.append("index_id", index_id);
     formData.append("video_url", video_url);
 
+    // TODO: Remove the api key
+
     try {
         const response = await fetch("https://api.twelvelabs.io/v1.3/tasks", {
             method: "POST",
             headers: {
-                "x-api-key": "tlk_0AYZT1A2KXWGGW2T8F8TM3SSF9BW",
+                "x-api-key": process.env.TWELVE_LABS_API_KEY,
                 ...formData.getHeaders(),
             },
             body: formData,
