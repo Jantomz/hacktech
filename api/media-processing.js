@@ -1,5 +1,5 @@
 import ffmpeg from "fluent-ffmpeg";
-import ffmpegPath from "ffmpeg-static"; // <- note change
+import ffmpegPath from "ffmpeg-static";
 import { tmpdir } from "os";
 import { join } from "path";
 import fs from "fs";
@@ -18,13 +18,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Validate the video URL
-        const url = new URL(videoUrl);
-        if (!["http:", "https:"].includes(url.protocol)) {
-            return res
-                .status(400)
-                .json({ error: "Invalid video URL protocol" });
-        }
+        new URL(videoUrl); // just to validate format
     } catch {
         return res.status(400).json({ error: "Invalid video URL format" });
     }
@@ -40,10 +34,7 @@ export default async function handler(req, res) {
                 res.setHeader("Content-Type", "audio/mpeg");
                 audioStream.pipe(res);
 
-                // Clean up the temporary file after streaming
-                audioStream.on("end", () => {
-                    const stats = fs.statSync(outputPath);
-                    console.log(`Audio file size: ${stats.size} bytes`);
+                audioStream.on("close", () => {
                     fs.unlinkSync(outputPath);
                 });
             })
