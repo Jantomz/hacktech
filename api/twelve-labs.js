@@ -1,5 +1,5 @@
-const fetch = require("node-fetch");
-const FormData = require("form-data");
+import fetch from "node-fetch";
+import FormData from "form-data";
 
 export default async function handler(req, res) {
     const { index_id, video_url } = req.body;
@@ -30,12 +30,11 @@ export default async function handler(req, res) {
             return res.status(response.status).json({ error: data });
         }
 
-        res.status(200).json(data);
+        return res.status(200).json(data);
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             error: "Internal Server Error",
             details: error.message,
         });
     }
-    res.status(200).json({ message: "Hello from Vite serverless!" });
 }
