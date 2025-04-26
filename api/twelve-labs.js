@@ -2,7 +2,7 @@ const fetch = require("node-fetch");
 const FormData = require("form-data");
 
 export default async function handler(req, res) {
-    const { index_id, video_url } = req.body;
+    const { index_id, video_url, api_key } = req.body;
 
     if (!index_id || !video_url) {
         return res
@@ -18,7 +18,7 @@ export default async function handler(req, res) {
         const response = await fetch("https://api.twelvelabs.io/v1.3/tasks", {
             method: "POST",
             headers: {
-                "x-api-key": "tlk_0AYZT1A2KXWGGW2T8F8TM3SSF9BW",
+                "x-api-key": api_key,
                 ...formData.getHeaders(),
             },
             body: formData,
