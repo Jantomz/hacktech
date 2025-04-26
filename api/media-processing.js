@@ -18,6 +18,18 @@ export default async function handler(req, res) {
     }
 
     try {
+        // Validate the video URL
+        const url = new URL(videoUrl);
+        if (!["http:", "https:"].includes(url.protocol)) {
+            return res
+                .status(400)
+                .json({ error: "Invalid video URL protocol" });
+        }
+    } catch {
+        return res.status(400).json({ error: "Invalid video URL format" });
+    }
+
+    try {
         const outputPath = join(tmpdir(), `audio-${Date.now()}.mp3`);
 
         ffmpeg(videoUrl)
