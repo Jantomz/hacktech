@@ -1,201 +1,248 @@
-
-import React from "react";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState } from "react";
 import { AppLayoutWrapper } from "@/components/layout/AppLayoutWrapper";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import BudgetMap from "@/components/maps/BudgetMap";
-import BudgetPieChart from "@/components/visualizations/BudgetPieChart";
 import BudgetBarChart from "@/components/visualizations/BudgetBarChart";
+import BudgetPieChart from "@/components/visualizations/BudgetPieChart";
 import BudgetLineChart from "@/components/visualizations/BudgetLineChart";
-import VideoSection from "@/components/VideoSection";
-import { ArrowRight } from "lucide-react";
+import { TimeScrubbingMap } from "@/components/maps/TimeScrubbingMap";
+import { EmailSubscription } from "@/components/budget/EmailSubscription";
+import { DocumentProcessor } from "@/components/budget/DocumentProcessor";
+import { Button } from "@/components/ui/button";
+import { FileText, Download, Share } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const Dashboard = () => {
-  const { toast } = useToast();
-
-  const handlePublish = () => {
-    toast({
-      title: "Dashboard Published!",
-      description: "Your budget dashboard is now publicly available.",
-    });
-  };
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("overview");
 
   return (
     <AppLayoutWrapper>
-      <div className="container mx-auto py-6 px-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+      <div className="container mx-auto py-8 px-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Budget Dashboard</h1>
-            <p className="text-muted-foreground">Sample City Budget - Fiscal Year 2025</p>
+            <h1 className="text-3xl font-bold mb-2">Budget Dashboard</h1>
+            <p className="text-muted-foreground">
+              Interactive visualizations of your government's budget data
+            </p>
           </div>
-          
-          <div className="flex gap-4">
-            <Button variant="outline" onClick={() => window.print()}>
-              Export Report
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Export Data
             </Button>
-            <Button 
-              className="bg-budget-primary hover:bg-budget-primary/90"
-              onClick={handlePublish}
-            >
-              Publish Dashboard <ArrowRight className="ml-2 h-4 w-4" />
+            <Button variant="outline" size="sm">
+              <Share className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+            <Button className="bg-budget-primary hover:bg-budget-primary/90" size="sm">
+              <FileText className="h-4 w-4 mr-2" />
+              Upload New Data
             </Button>
           </div>
         </div>
 
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="mb-8">
+        <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-5 w-full max-w-3xl mb-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="geographic">Geographic View</TabsTrigger>
-            <TabsTrigger value="trends">Trends</TabsTrigger>
-            <TabsTrigger value="meetings">Council Meetings</TabsTrigger>
+            <TabsTrigger value="geographic">Geographic</TabsTrigger>
+            <TabsTrigger value="temporal">Temporal</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="overview" className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <BudgetPieChart />
-              <BudgetBarChart />
+          <TabsContent value="overview">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card className="col-span-full">
+                <CardHeader>
+                  <CardTitle>Budget Summary</CardTitle>
+                  <CardDescription>
+                    Fiscal Year 2024-2025 Budget Overview
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card>
+                      <CardHeader className="py-4">
+                        <CardTitle className="text-sm font-medium">Total Budget</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-2xl font-bold">$124.5M</p>
+                        <p className="text-xs text-muted-foreground">
+                          <span className="text-green-500">↑ 4.2%</span> from previous year
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="py-4">
+                        <CardTitle className="text-sm font-medium">Departments</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-2xl font-bold">12</p>
+                        <p className="text-xs text-muted-foreground">
+                          Across 5 major categories
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="py-4">
+                        <CardTitle className="text-sm font-medium">Projects</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-2xl font-bold">78</p>
+                        <p className="text-xs text-muted-foreground">
+                          <span className="text-green-500">↑ 8</span> new projects this year
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Department Allocations</CardTitle>
+                  <CardDescription>Budget by department</CardDescription>
+                </CardHeader>
+                <CardContent className="h-[300px]">
+                  <BudgetBarChart />
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Spending Categories</CardTitle>
+                  <CardDescription>Budget distribution</CardDescription>
+                </CardHeader>
+                <CardContent className="h-[300px]">
+                  <BudgetPieChart />
+                </CardContent>
+              </Card>
+              
+              <Card className="col-span-full">
+                <CardHeader>
+                  <CardTitle>Budget Trends</CardTitle>
+                  <CardDescription>5-year historical view</CardDescription>
+                </CardHeader>
+                <CardContent className="h-[300px]">
+                  <BudgetLineChart />
+                </CardContent>
+              </Card>
             </div>
-            
-            <BudgetMap />
           </TabsContent>
           
           <TabsContent value="geographic">
-            <div className="space-y-6">
-              <BudgetMap />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Geographic Budget Distribution</CardTitle>
+                  <CardDescription>Interactive map with time scrubbing</CardDescription>
+                </CardHeader>
+                <CardContent className="h-[500px]">
+                  <TimeScrubbingMap />
+                </CardContent>
+              </Card>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-budget-primary/10 p-6 rounded-lg">
-                  <h3 className="font-bold text-xl mb-2">Downtown</h3>
-                  <p className="text-2xl font-bold text-budget-primary mb-1">$10.5M</p>
-                  <p className="text-sm text-muted-foreground">15.3% increase from 2024</p>
-                  <div className="mt-4">
-                    <h4 className="font-medium text-sm mb-2">Top Projects:</h4>
-                    <ul className="space-y-1 text-sm">
-                      <li>• Downtown Revitalization</li>
-                      <li>• Main Street Improvements</li>
-                      <li>• Central Park Renovation</li>
-                    </ul>
-                  </div>
-                </div>
-                
-                <div className="bg-budget-primary/10 p-6 rounded-lg">
-                  <h3 className="font-bold text-xl mb-2">North District</h3>
-                  <p className="text-2xl font-bold text-budget-primary mb-1">$7.3M</p>
-                  <p className="text-sm text-muted-foreground">7.4% increase from 2024</p>
-                  <div className="mt-4">
-                    <h4 className="font-medium text-sm mb-2">Top Projects:</h4>
-                    <ul className="space-y-1 text-sm">
-                      <li>• North Park Renovation</li>
-                      <li>• Neighborhood Safety Initiative</li>
-                      <li>• Community Pool Repairs</li>
-                    </ul>
-                  </div>
-                </div>
-                
-                <div className="bg-budget-primary/10 p-6 rounded-lg">
-                  <h3 className="font-bold text-xl mb-2">East District</h3>
-                  <p className="text-2xl font-bold text-budget-primary mb-1">$7.1M</p>
-                  <p className="text-sm text-muted-foreground">12.7% increase from 2024</p>
-                  <div className="mt-4">
-                    <h4 className="font-medium text-sm mb-2">Top Projects:</h4>
-                    <ul className="space-y-1 text-sm">
-                      <li>• East Side Community Center</li>
-                      <li>• Library Expansion</li>
-                      <li>• Bike Lane Construction</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>District Breakdown</CardTitle>
+                  <CardDescription>Budget allocation by district</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {["Downtown", "Westside", "Eastside", "Northside", "Southside"].map((district) => (
+                    <div key={district} className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">{district}</p>
+                        <p className="text-xs text-muted-foreground">Various projects</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium">
+                          ${(Math.random() * 800000 + 200000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {Math.floor(Math.random() * 20) + 5} projects
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
           
-          <TabsContent value="trends">
-            <div className="space-y-8">
-              <BudgetLineChart />
-              <BudgetBarChart />
+          <TabsContent value="temporal">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="col-span-full">
+                <CardHeader>
+                  <CardTitle>Budget Evolution</CardTitle>
+                  <CardDescription>Year-over-year changes in major spending categories</CardDescription>
+                </CardHeader>
+                <CardContent className="h-[400px]">
+                  <BudgetLineChart />
+                </CardContent>
+              </Card>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white dark:bg-card rounded-lg p-6 shadow-md">
-                  <h3 className="text-lg font-medium mb-4">5-Year Trend Analysis</h3>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Spending Velocity</CardTitle>
+                  <CardDescription>Monthly expenditure rate</CardDescription>
+                </CardHeader>
+                <CardContent className="h-[300px]">
+                  <BudgetBarChart />
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Fiscal Calendar</CardTitle>
+                  <CardDescription>Key budget milestones and events</CardDescription>
+                </CardHeader>
+                <CardContent>
                   <div className="space-y-4">
-                    <div>
-                      <h4 className="font-medium text-sm text-muted-foreground mb-1">Public Safety</h4>
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 bg-budget-primary rounded-full w-3/4"></div>
-                        <span className="text-sm font-medium">+12%</span>
+                    {[
+                      { date: "Jan 15, 2024", event: "Budget Planning Begins", status: "Completed" },
+                      { date: "Mar 5, 2024", event: "Department Submissions Due", status: "Completed" },
+                      { date: "Apr 20, 2024", event: "Public Budget Hearings", status: "Completed" },
+                      { date: "Jun 1, 2024", event: "Budget Approval", status: "Completed" },
+                      { date: "Jul 1, 2024", event: "Fiscal Year Begins", status: "In Progress" },
+                      { date: "Oct 15, 2024", event: "Q1 Budget Review", status: "Upcoming" },
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-start">
+                        <div className={`h-4 w-4 rounded-full mt-1 mr-3 ${
+                          item.status === "Completed" ? "bg-green-500" : 
+                          item.status === "In Progress" ? "bg-blue-500" : "bg-gray-300"
+                        }`}></div>
+                        <div>
+                          <p className="font-medium">{item.event}</p>
+                          <p className="text-xs text-muted-foreground">{item.date}</p>
+                        </div>
                       </div>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-sm text-muted-foreground mb-1">Infrastructure</h4>
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 bg-budget-primary rounded-full w-1/2"></div>
-                        <span className="text-sm font-medium">+8%</span>
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-sm text-muted-foreground mb-1">Parks & Recreation</h4>
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 bg-budget-primary rounded-full w-1/4"></div>
-                        <span className="text-sm font-medium">+4%</span>
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-sm text-muted-foreground mb-1">Community Services</h4>
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 bg-budget-primary rounded-full w-1/5"></div>
-                        <span className="text-sm font-medium">+3%</span>
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                </div>
-                
-                <div className="bg-white dark:bg-card rounded-lg p-6 shadow-md col-span-2">
-                  <h3 className="text-lg font-medium mb-4">Budget Highlights</h3>
-                  <div className="space-y-4">
-                    <div className="flex gap-4 items-start">
-                      <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mt-1">
-                        <svg className="w-4 h-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Revenue Growth</h4>
-                        <p className="text-sm text-muted-foreground">Overall revenue has increased by 5.2% compared to the previous fiscal year, primarily due to increased property tax collection and new business licenses.</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-4 items-start">
-                      <div className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mt-1">
-                        <svg className="w-4 h-4 text-yellow-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Expense Management</h4>
-                        <p className="text-sm text-muted-foreground">Despite inflation pressures, operational expenses were kept under control, with only a 3.1% increase year-over-year, below the national average for municipalities.</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-4 items-start">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mt-1">
-                        <svg className="w-4 h-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Capital Projects</h4>
-                        <p className="text-sm text-muted-foreground">The capital budget has allocated $15.3M for major infrastructure projects, including downtown revitalization, park renovations, and the new community center.</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
           
-          <TabsContent value="meetings">
-            <VideoSection />
+          <TabsContent value="documents">
+            <div className="grid grid-cols-1 gap-6">
+              <DocumentProcessor />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <EmailSubscription />
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notification Preferences</CardTitle>
+                  <CardDescription>Manage your budget update notifications</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  // Additional settings can be added here
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

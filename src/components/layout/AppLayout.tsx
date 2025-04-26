@@ -2,15 +2,19 @@
 import React, { PropsWithChildren } from "react";
 import { Navbar } from "./Navbar";
 
+interface AppLayoutProps {
+  transparentHeader?: boolean;
+  onNavigate?: (path: string) => void;
+}
+
 export function AppLayout({ 
   children,
-  transparentHeader = false 
-}: PropsWithChildren<{ 
-  transparentHeader?: boolean 
-}>) {
+  transparentHeader = false,
+  onNavigate
+}: PropsWithChildren<AppLayoutProps>) {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar transparent={transparentHeader} />
+      <Navbar transparent={transparentHeader} onNavigate={onNavigate} />
       <main className="flex-1 flex flex-col">
         {children}
       </main>
