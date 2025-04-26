@@ -1,8 +1,8 @@
 import { OAuth2Client } from "google-auth-library";
 import { google } from "googleapis";
 
-const CLIENT_ID = process.env.VITE_GOOGLE_CLIENT_ID;
-const CLIENT_SECRET = process.env.VITE_GOOGLE_CLIENT_SECRET;
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const REDIRECT_URI = "http://localhost:3000/api/auth/callback/google"; // Change this to your deployed URI for production
 
 const oauth2Client = new google.auth.OAuth2(
