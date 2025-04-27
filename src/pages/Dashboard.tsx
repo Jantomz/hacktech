@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AppLayoutWrapper } from "@/components/layout/AppLayoutWrapper";
 import {
     Card,
@@ -178,9 +178,12 @@ const Dashboard = () => {
 
                             <Card className="col-span-full">
                                 <CardHeader>
-                                    <CardTitle>AI-Generated Budget Analysis</CardTitle>
+                                    <CardTitle>
+                                        AI-Generated Budget Analysis
+                                    </CardTitle>
                                     <CardDescription>
-                                        Analysis extracted using AI from budget documents
+                                        Analysis extracted using AI from budget
+                                        documents
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>

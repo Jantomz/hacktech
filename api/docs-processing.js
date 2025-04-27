@@ -23,7 +23,7 @@ export default async function handler(req, res) {
 
         const data = await response.json();
         console.log("Chart data:", data.tasks[1].outputData);
-        res.status(200).json({ data: data.output?.graphs || [] });
+        res.status(200).json({ data: data.tasks[1].outputData || [] });
     } catch (err) {
         console.error("Error fetching chart data:", err);
         res.status(500).json({
