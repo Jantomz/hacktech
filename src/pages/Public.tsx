@@ -19,7 +19,7 @@ import RAGBot from "@/components/budget/RAGBot";
 import CountUp from "@/components/CountUp";
 import { supabase } from "@/lib/supabase";
 
-const Preview = () => {
+const Public = () => {
     const [activeTab, setActiveTab] = useState("overview");
     const [userId, setUserId] = useState<string>(null);
 
@@ -703,4 +703,4 @@ const Preview = () => {
     );
 };
 
-export default Preview;
+export default Public;

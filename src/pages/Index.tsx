@@ -35,12 +35,53 @@ const Index = () => {
                                 className="border-white text-white hover:bg-white/20 bg-transparent border-2 text-lg px-8"
                                 onClick={() => navigate("/dashboard")}
                             >
-                                View Demo Dashboard
+                                Start Your Dashboard
                             </Button>
                         </div>
                     </div>
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent"></div>
+            </section>
+
+            {/* Code Input Section */}
+            <section className="py-16 px-4 bg-gray-100">
+                <div className="container mx-auto max-w-md text-center">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4">
+                        Enter Cities' Access Code
+                    </h2>
+                    <p className="text-muted-foreground mb-6">
+                        Input a unique code to access your cities' budget
+                        dashboard.
+                    </p>
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            const code = (
+                                e.target as HTMLFormElement
+                            ).elements.namedItem("code") as HTMLInputElement;
+                            if (code.value.trim()) {
+                                navigate(
+                                    `/preview?userId=${code.value.trim()}`
+                                );
+                            }
+                        }}
+                    >
+                        <input
+                            type="text"
+                            name="code"
+                            placeholder="Enter your code"
+                            className="w-full px-4 py-2 border rounded-md mb-4"
+                            required
+                        />
+                        <Button
+                            type="submit"
+                            size="lg"
+                            className="bg-budget-primary text-white hover:bg-budget-primary/90 text-lg px-8 w-full"
+                        >
+                            Submit
+                        </Button>
+                    </form>
+                </div>
             </section>
 
             {/* Features section */}
