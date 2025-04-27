@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 
 export const DocumentProcessor = () => {
     const [url, setUrl] = useState("");
     const [isProcessing, setIsProcessing] = useState(false);
     const { toast } = useToast();
 
-    const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+    const { user } = useAuth(); // Assuming you have a way to get the current user
 
     const handleUrlSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -19,6 +20,22 @@ export const DocumentProcessor = () => {
         try {
             // Here we would integrate with Supabase Edge Functions to process the URL
             console.log("Processing URL:", url);
+
+            const response = await fetch("/api/docs-processing", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ documentUrl: url, uid: user.id }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to process the document");
+            }
+
+            const data = await response.json();
+
+            console.log("Processing result:", data);
             toast({
                 title: "Processing started",
                 description:
@@ -42,74 +59,17 @@ export const DocumentProcessor = () => {
                 <CardTitle>Process Budget Documents</CardTitle>
             </CardHeader>
             <CardContent>
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        if (uploadedFiles.length === 0) return;
-
-                        setIsProcessing(true);
-                        try {
-                            // Here we would integrate with Supabase Edge Functions to process the files
-                            console.log("Processing files:", uploadedFiles);
-                            toast({
-                                title: "Processing started",
-                                description:
-                                    "Your documents are being processed. This may take a few minutes.",
-                            });
-                            setUploadedFiles([]);
-                        } catch (error) {
-                            toast({
-                                title: "Processing failed",
-                                description: "Please try again",
-                                variant: "destructive",
-                            });
-                        } finally {
-                            setIsProcessing(false);
-                        }
-                    }}
-                    className="space-y-4"
-                >
+                <form onSubmit={handleUrlSubmit} className="space-y-4">
                     <div className="space-y-4">
-                        <div className="flex gap-2">
-                            <Input
-                                type="file"
-                                multiple
-                                onChange={(e) => {
-                                    const files = e.target.files;
-                                    if (files) {
-                                        setUploadedFiles((prev) => [
-                                            ...prev,
-                                            ...Array.from(files).map(
-                                                (file) => file.name
-                                            ),
-                                        ]);
-                                    }
-                                }}
-                                disabled={isProcessing}
-                            />
-                        </div>
-                        <div>
-                            <h4 className="text-sm font-medium">
-                                Uploaded Files:
-                            </h4>
-                            <div className="flex flex-wrap gap-2">
-                                {uploadedFiles.map((file, index) => (
-                                    <div
-                                        key={index}
-                                        className="px-3 py-1 bg-gray-200 text-sm rounded-md"
-                                    >
-                                        {file}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <Button
-                            type="submit"
-                            disabled={
-                                isProcessing || uploadedFiles.length === 0
-                            }
-                        >
-                            Process All
+                        <Input
+                            type="text"
+                            placeholder="Enter document URL"
+                            value={url}
+                            onChange={(e) => setUrl(e.target.value)}
+                            disabled={isProcessing}
+                        />
+                        <Button type="submit" disabled={isProcessing || !url}>
+                            Process URL
                         </Button>
                     </div>
                 </form>
