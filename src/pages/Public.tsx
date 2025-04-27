@@ -13,21 +13,25 @@ import BudgetPieChart from "@/components/visualizations/BudgetPieChart";
 import BudgetLineChart from "@/components/visualizations/BudgetLineChart";
 import ChartsViewer from "@/components/visualizations/ChartsViewer";
 import { TimeScrubbingMap } from "@/components/maps/TimeScrubbingMap";
-import BudgetMap from "@/components/maps/BudgetMap";
-import { EmailSubscription } from "@/components/budget/EmailSubscription";
-import { DocumentProcessor } from "@/components/budget/DocumentProcessor";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, Share } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
-import { BoardRecordingProcessor } from "@/components/budget/BoardRecordingProcessor";
-import Profile from "@/components/auth/Profile";
 import RAGBot from "@/components/budget/RAGBot";
 import CountUp from "@/components/CountUp";
 import { supabase } from "@/lib/supabase";
 
-const Dashboard = () => {
-    const { user } = useAuth();
+const Public = () => {
     const [activeTab, setActiveTab] = useState("overview");
+    const [userId, setUserId] = useState<string>(null);
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const userIdFromUrl = urlParams.get("userId");
+        if (userIdFromUrl) {
+            console.log("User ID from URL:", userIdFromUrl);
+            setUserId(userIdFromUrl);
+            // Perform any additional logic with the userIdFromUrl if needed
+        }
+    }, []);
 
     const [profile, setProfile] = useState({
         name: "",
@@ -41,13 +45,13 @@ const Dashboard = () => {
 
     // Fetch profile on mount
     useEffect(() => {
-        if (!user) return;
         setLoading(true);
-        console.log("Fetching profile for user:", user.id);
+        if (!userId) return;
+        console.log("Fetching profile for user:", userId);
         supabase
             .from("accounts")
             .select("*")
-            .eq("uid", user.id)
+            .eq("uid", userId)
             .single()
             .then(async ({ data, error }) => {
                 console.log("Profile data:", data);
@@ -64,7 +68,7 @@ const Dashboard = () => {
                     // No profile exists, so create one
                     console.log("No profile exists, so creating one");
                     const emptyProfile = {
-                        uid: user.id,
+                        uid: setUserId,
                         name: "",
                         city: "",
                         state: "",
@@ -88,7 +92,7 @@ const Dashboard = () => {
                 }
                 setLoading(false);
             });
-    }, [user]);
+    }, [userId]);
 
     const [budgetEntries, setBudgetEntries] = useState<
         {
@@ -111,7 +115,7 @@ const Dashboard = () => {
             const response = await fetch("/api/docs-get", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ uid: user.id }),
+                body: JSON.stringify({ uid: userId }),
             });
 
             if (!response.ok) {
@@ -123,23 +127,20 @@ const Dashboard = () => {
             setBudgetEntries(data.entries[0].budget_entries || []);
         } catch (error: unknown) {
             if (error instanceof Error) {
-                setError(error.message);
+                console.error("Error processing documents:", error.message);
             } else {
-                setError("Unknown error");
+                console.error("Error processing documents:", error);
             }
-            if (error instanceof Error) {
-                setError(error.message);
-            } else {
-                setError("Unknown error");
-            }
+            setError(error instanceof Error ? error.message : "Unknown error");
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
+        if (!userId) return;
         getDocumentData();
-    }, []);
+    }, [userId]);
 
     return (
         <AppLayoutWrapper>
@@ -189,7 +190,7 @@ const Dashboard = () => {
                                 popup.style.zIndex = "1000";
 
                                 const userIdText = document.createElement("p");
-                                userIdText.textContent = `User ID: ${user.id}`;
+                                userIdText.textContent = `User ID: ${userId}`;
                                 userIdText.style.marginBottom = "10px";
 
                                 const copyButton =
@@ -206,9 +207,8 @@ const Dashboard = () => {
                                 copyButton.style.marginBottom = "10px";
 
                                 copyButton.onclick = () => {
-                                    navigator.clipboard.writeText(
-                                        user.id || ""
-                                    );
+                                    navigator.clipboard.writeText(userId || "");
+                                    alert("User ID copied to clipboard!");
                                 };
 
                                 const closeButton =
@@ -236,14 +236,6 @@ const Dashboard = () => {
                             <Share className="h-4 w-4 mr-2" />
                             Share
                         </Button>
-                        {/* <Button
-                            className="bg-budget-primary hover:bg-budget-primary/90"
-                            size="sm"
-                            onClick={() => setActiveTab("data")}
-                        >
-                            <FileText className="h-4 w-4 mr-2" />
-                            Upload New Data
-                        </Button> */}
                     </div>
                 </div>
 
@@ -252,12 +244,10 @@ const Dashboard = () => {
                     onValueChange={setActiveTab}
                     className="w-full"
                 >
-                    <TabsList className="grid grid-cols-5 w-full max-w-3xl mb-8">
+                    <TabsList className="grid grid-cols-3 w-full max-w-3xl mb-8">
                         <TabsTrigger value="overview">Overview</TabsTrigger>
                         <TabsTrigger value="geographic">Geographic</TabsTrigger>
                         <TabsTrigger value="temporal">Temporal</TabsTrigger>
-                        <TabsTrigger value="data">Data Hub</TabsTrigger>
-                        <TabsTrigger value="settings">Settings</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="overview">
@@ -706,29 +696,6 @@ const Dashboard = () => {
                             </Card>
                         </div>
                     </TabsContent>
-
-                    <TabsContent value="data">
-                        <div className="grid grid-cols-1 gap-6">
-                            <DocumentProcessor />
-                            <BoardRecordingProcessor />
-                        </div>
-                    </TabsContent>
-
-                    <TabsContent value="settings">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Profile</CardTitle>
-                                    <CardDescription>
-                                        Manage your city profile
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <Profile />
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </TabsContent>
                 </Tabs>
             </div>
             <RAGBot />
@@ -736,4 +703,4 @@ const Dashboard = () => {
     );
 };
 
-export default Dashboard;
+export default Public;
