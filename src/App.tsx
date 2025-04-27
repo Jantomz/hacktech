@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
+import Public from "./pages/Public";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,8 @@ const App = () => (
                                 </ProtectedRoute>
                             }
                         />
+                        <Route path="/public" element={<Public />} />
+
                         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                         <Route path="*" element={<NotFound />} />
                     </Routes>

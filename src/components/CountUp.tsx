@@ -35,7 +35,7 @@ const CountUp: React.FC<CountUpProps> = ({ targetNumber, format = false }) => {
         return () => clearInterval(interval);
     }, [targetNumber]);
 
-    return <div>{format ? formatNumber(currentNumber) : currentNumber}</div>;
+    return <>{format ? formatNumber(currentNumber) : currentNumber}</>;
 };
 
 export default CountUp;

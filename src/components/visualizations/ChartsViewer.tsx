@@ -37,9 +37,15 @@ export default function ChartsViewer() {
             const data = await response.json();
             console.log("Document processing result:", data);
             setBudgetEntries(data.entries[0].budget_entries || []);
-        } catch (error: any) {
-            console.error("Error processing documents:", error);
-            setError(error.message || "Unknown error");
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error("Error processing documents:", error.message);
+                setError(error.message);
+            } else {
+                console.error("Error processing documents:", error);
+                setError("An unknown error occurred");
+            }
+            setError(error instanceof Error ? error.message : "Unknown error");
         } finally {
             setLoading(false);
         }
@@ -104,11 +110,14 @@ export default function ChartsViewer() {
             amount: entry.amount_usd,
         }));
 
-    const departmentTotals = budgetEntries.reduce((acc: any, entry) => {
-        const dept = entry.department || "Unknown";
-        acc[dept] = (acc[dept] || 0) + (entry.amount_usd || 0);
-        return acc;
-    }, {});
+    const departmentTotals = budgetEntries.reduce(
+        (acc: Record<string, number>, entry) => {
+            const dept = entry.department || "Unknown";
+            acc[dept] = (acc[dept] || 0) + (entry.amount_usd || 0);
+            return acc;
+        },
+        {}
+    );
 
     const departmentData = Object.keys(departmentTotals).map((dept) => ({
         name: dept,

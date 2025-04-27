@@ -53,6 +53,10 @@ export const TimeScrubbingMap = () => {
                     } catch (err) {
                         console.error("Error fetching coordinates:", err);
                     }
+                } else {
+                    setCoordinates([0, 0]);
+
+                    console.error("City not found in profile data");
                 }
             }
         };
