@@ -384,18 +384,15 @@ const Dashboard = () => {
 
                     <TabsContent value="settings">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <EmailSubscription />
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>
-                                        Notification Preferences
-                                    </CardTitle>
+                                    <CardTitle>Profile</CardTitle>
                                     <CardDescription>
-                                        Manage your budget update notifications
+                                        Manage your city profile
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    {/* Additional settings can be added here */}
+                                    <Profile />
                                 </CardContent>
                             </Card>
                         </div>
