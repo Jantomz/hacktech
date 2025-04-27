@@ -252,12 +252,37 @@ const Dashboard = () => {
                     onValueChange={setActiveTab}
                     className="w-full"
                 >
-                    <TabsList className="grid grid-cols-5 w-full max-w-3xl mb-8">
-                        <TabsTrigger value="overview">Overview</TabsTrigger>
-                        <TabsTrigger value="geographic">Geographic</TabsTrigger>
-                        <TabsTrigger value="temporal">Temporal</TabsTrigger>
-                        <TabsTrigger value="data">Data Hub</TabsTrigger>
-                        <TabsTrigger value="settings">Settings</TabsTrigger>
+                    <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 w-full gap-2 max-w-full mb-8">
+                        <TabsTrigger
+                            value="overview"
+                            className="text-xs sm:text-sm"
+                        >
+                            Overview
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="geographic"
+                            className="text-xs sm:text-sm"
+                        >
+                            Geographic
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="temporal"
+                            className="text-xs sm:text-sm"
+                        >
+                            Temporal
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="data"
+                            className="text-xs sm:text-sm"
+                        >
+                            Data Hub
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="settings"
+                            className="text-xs sm:text-sm"
+                        >
+                            Settings
+                        </TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="overview">
@@ -556,53 +581,54 @@ const Dashboard = () => {
 
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>District Breakdown</CardTitle>
+                                    <CardTitle>Category Breakdown</CardTitle>
                                     <CardDescription>
-                                        Budget allocation by district
+                                        Budget allocation by category
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
-                                    {[
-                                        "Downtown",
-                                        "Westside",
-                                        "Eastside",
-                                        "Northside",
-                                        "Southside",
-                                    ].map((district) => (
-                                        <div
-                                            key={district}
-                                            className="flex justify-between items-center"
-                                        >
-                                            <div>
-                                                <p className="font-medium">
-                                                    {district}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    Various projects
-                                                </p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="font-medium">
-                                                    $
-                                                    {(
-                                                        Math.random() * 800000 +
-                                                        200000
-                                                    )
-                                                        .toFixed(0)
-                                                        .replace(
-                                                            /\B(?=(\d{3})+(?!\d))/g,
-                                                            ","
-                                                        )}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {Math.floor(
-                                                        Math.random() * 20
-                                                    ) + 5}{" "}
-                                                    projects
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
+                                    <div className="max-h-[calc(100vh-500px)] overflow-y-auto space-y-4">
+                                        {Object.entries(
+                                            budgetEntries.reduce(
+                                                (acc, entry) => {
+                                                    acc[entry.subcategory] =
+                                                        (acc[
+                                                            entry.subcategory
+                                                        ] || 0) +
+                                                        entry.amount_usd;
+                                                    return acc;
+                                                },
+                                                {} as Record<string, number>
+                                            )
+                                        )
+                                            .sort((a, b) => b[1] - a[1])
+                                            .map(([subcategory, amount]) => (
+                                                <div
+                                                    key={subcategory}
+                                                    className="flex justify-between items-center p-3 bg-muted rounded-lg shadow-sm"
+                                                >
+                                                    <div>
+                                                        <p className="font-semibold text-primary">
+                                                            {subcategory}
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Budget allocation
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="font-bold text-lg text-secondary">
+                                                            $
+                                                            {amount
+                                                                .toFixed(0)
+                                                                .replace(
+                                                                    /\B(?=(\d{3})+(?!\d))/g,
+                                                                    ","
+                                                                )}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                    </div>
                                 </CardContent>
                             </Card>
                         </div>
