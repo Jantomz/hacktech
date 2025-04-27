@@ -10,6 +10,59 @@ export const TimeScrubbingMap = () => {
     const [year, setYear] = useState(2020);
     const years = [2020, 2021, 2022, 2023, 2024];
 
+    const [budgetEntries, setBudgetEntries] = useState<
+        {
+            year: number;
+            department: string;
+            category: string;
+            subcategory: string;
+            amount_usd: number;
+            fund_source: string;
+            geographic_area: string;
+            fiscal_period: string;
+            purpose: string;
+        }[]
+    >([]);
+
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const getDocumentData = async () => {
+        try {
+            const response = await fetch("/api/docs-get", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ uid: user.id }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to process documents");
+            }
+
+            const data = await response.json();
+            console.log("Document processing result:", data);
+            setBudgetEntries(data.entries[0].budget_entries || []);
+            console.log("Budget entries:", data.entries[0].budget_entries);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                setError(error.message);
+            } else {
+                setError("Unknown error");
+            }
+            if (error instanceof Error) {
+                setError(error.message);
+            } else {
+                setError("Unknown error");
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        getDocumentData();
+    }, []);
+
     const { user } = useAuth();
 
     const [profile, setProfile] = useState(null);
@@ -34,7 +87,9 @@ export const TimeScrubbingMap = () => {
                             headers: {
                                 "Content-Type": "application/json",
                             },
-                            body: JSON.stringify({ address: data[0].city }),
+                            body: JSON.stringify({
+                                address: data[0].city + ", " + data[0].state,
+                            }),
                         });
 
                         if (response.ok) {
@@ -71,7 +126,8 @@ export const TimeScrubbingMap = () => {
                     <div className="flex justify-center items-center h-64">
                         <div className="text-center">
                             <p className="text-sm text-muted-foreground">
-                                Loading profile...
+                                Loading profile... (Make sure to set your city
+                                and state in the profile)
                             </p>
                         </div>
                     </div>
@@ -87,7 +143,8 @@ export const TimeScrubbingMap = () => {
                     <div className="flex justify-center items-center h-64">
                         <div className="text-center">
                             <p className="text-sm text-muted-foreground">
-                                Loading coordinates...
+                                Loading coordinates... (Make sure to set your
+                                city and state in the profile)
                             </p>
                         </div>
                     </div>
@@ -97,54 +154,40 @@ export const TimeScrubbingMap = () => {
     }
 
     // Sample budget data - this would be replaced with real data from Supabase
-    const budgetData = {
+    const budgetFeatures = {
         type: "FeatureCollection",
-        features: [
-            {
-                properties: {
-                    name: "Downtown",
-                    budget2020: 5000000,
-                    budget2021: 5200000,
-                    budget2022: 5400000,
-                    budget2023: 5600000,
-                    budget2024: 5800000,
-                },
-                coordinates: [-74.006, 40.7128], // NYC
-            },
-            {
-                properties: {
-                    name: "Westside",
-                    budget2020: 3000000,
-                    budget2021: 3300000,
-                    budget2022: 3500000,
-                    budget2023: 3700000,
-                    budget2024: 3900000,
-                },
-                coordinates: [coordinates[1], coordinates[0]], // LA
-            },
-            {
-                properties: {
-                    name: "Eastside",
-                    budget2020: 2500000,
-                    budget2021: 2700000,
-                    budget2022: 2900000,
-                    budget2023: 3100000,
-                    budget2024: 3300000,
-                },
-                coordinates: [-87.6298, 41.8781], // Chicago
-            },
-            {
-                properties: {
-                    name: "Northside",
-                    budget2020: 1800000,
-                    budget2021: 1900000,
-                    budget2022: 2100000,
-                    budget2023: 2300000,
-                    budget2024: 2500000,
-                },
-                coordinates: [-95.3698, 29.7604], // Houston
-            },
-        ],
+        features:
+            coordinates[0] !== 0 && coordinates[1] !== 0
+                ? budgetEntries.map((entry, index) => ({
+                      properties: {
+                          name: entry.subcategory || `Subcategory ${index + 1}`,
+                          budget2020:
+                              entry.year === 2020
+                                  ? entry.amount_usd * (Math.random() * 1000)
+                                  : Math.random() * 100,
+                          budget2021:
+                              entry.year === 2021
+                                  ? entry.amount_usd * (Math.random() * 1000)
+                                  : Math.random() * 100,
+                          budget2022:
+                              entry.year === 2022
+                                  ? entry.amount_usd * (Math.random() * 1000)
+                                  : Math.random() * 100,
+                          budget2023:
+                              entry.year === 2023
+                                  ? entry.amount_usd * (Math.random() * 1000)
+                                  : Math.random() * 100,
+                          budget2024:
+                              entry.year === 2024
+                                  ? entry.amount_usd * (Math.random() * 1000)
+                                  : Math.random() * 100,
+                      },
+                      coordinates: [
+                          coordinates[1] + (Math.random() - 0.5) * 0.1, // Randomized nearby longitude
+                          coordinates[0] + (Math.random() - 0.5) * 0.1, // Randomized nearby latitude
+                      ],
+                  }))
+                : [],
     };
 
     return (
@@ -171,7 +214,7 @@ export const TimeScrubbingMap = () => {
                     {coordinates && coordinates[0] && coordinates[1] && (
                         <MapContainer
                             center={[coordinates[0], coordinates[1]]}
-                            zoom={10}
+                            zoom={11}
                             className="h-full w-full rounded-md"
                             scrollWheelZoom={false}
                         >
@@ -179,10 +222,10 @@ export const TimeScrubbingMap = () => {
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                             />
-                            {budgetData.features.map((feature, index) => {
+                            {budgetFeatures.features.map((feature, index) => {
                                 const currentBudget =
                                     feature.properties[`budget${year}`];
-                                const radius = Math.sqrt(currentBudget) / 100;
+                                const radius = Math.sqrt(currentBudget);
 
                                 return (
                                     <CircleMarker
@@ -193,11 +236,35 @@ export const TimeScrubbingMap = () => {
                                         ]}
                                         radius={radius}
                                         fillColor={
-                                            currentBudget > 4000000
-                                                ? "#FB7185"
-                                                : currentBudget > 2000000
-                                                ? "#FBBF24"
-                                                : "#4ADE80"
+                                            currentBudget > 90
+                                                ? "#EF4444" // Red
+                                                : currentBudget > 80
+                                                ? "#F97316" // Orange
+                                                : currentBudget > 70
+                                                ? "#F59E0B" // Amber
+                                                : currentBudget > 60
+                                                ? "#EAB308" // Yellow
+                                                : currentBudget > 50
+                                                ? "#84CC16" // Lime
+                                                : currentBudget > 40
+                                                ? "#22C55E" // Green
+                                                : currentBudget > 30
+                                                ? "#10B981" // Emerald
+                                                : currentBudget > 20
+                                                ? "#06B6D4" // Cyan
+                                                : currentBudget > 10
+                                                ? "#3B82F6" // Blue
+                                                : currentBudget > 5
+                                                ? "#6366F1" // Indigo
+                                                : currentBudget > 2
+                                                ? "#8B5CF6" // Violet
+                                                : currentBudget > 1
+                                                ? "#A855F7" // Purple
+                                                : currentBudget > 0.5
+                                                ? "#D946EF" // Fuchsia
+                                                : currentBudget > 0.1
+                                                ? "#EC4899" // Pink
+                                                : "#F43F5E" // Rose
                                         }
                                         color="white"
                                         weight={1}

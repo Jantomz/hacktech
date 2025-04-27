@@ -21,14 +21,14 @@ const Index = () => {
                             understand.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Button
+                            {/* <Button
                                 size="lg"
                                 className="bg-white text-budget-primary hover:bg-white/90 text-lg px-8"
                                 onClick={() => navigate("/upload")}
                             >
                                 Upload Budget{" "}
                                 <ArrowRight className="ml-2 h-5 w-5" />
-                            </Button>
+                            </Button> */}
                             <Button
                                 size="lg"
                                 variant="outline"
@@ -47,10 +47,10 @@ const Index = () => {
             <section className="py-16 px-4 bg-gray-100">
                 <div className="container mx-auto max-w-md text-center">
                     <h2 className="text-2xl md:text-3xl font-bold mb-4">
-                        Enter Cities' Access Code
+                        Enter Your City's Access Code
                     </h2>
                     <p className="text-muted-foreground mb-6">
-                        Input a unique code to access your cities' budget
+                        Input a unique code to access your city's budget
                         dashboard.
                     </p>
                     <form
@@ -282,8 +282,8 @@ const Index = () => {
                     </p>
                     <Button
                         size="lg"
-                        className="bg-budget-primary hover:bg-budget-primary/90 text-lg px-8"
-                        onClick={() => navigate("/upload")}
+                        className="bg-budget-primary hover:bg-budget-primary/90 text-lg px-6 sm:px-8 md:text-xs w-full sm:w-auto"
+                        onClick={() => navigate("/dashboard")}
                     >
                         Upload Your Budget{" "}
                         <ArrowRight className="ml-2 h-5 w-5" />
