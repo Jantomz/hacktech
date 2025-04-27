@@ -282,8 +282,8 @@ const Index = () => {
                     </p>
                     <Button
                         size="lg"
-                        className="bg-budget-primary hover:bg-budget-primary/90 text-lg px-8"
-                        onClick={() => navigate("/upload")}
+                        className="bg-budget-primary hover:bg-budget-primary/90 text-lg px-6 sm:px-8 md:text-xs w-full sm:w-auto"
+                        onClick={() => navigate("/dashboard")}
                     >
                         Upload Your Budget{" "}
                         <ArrowRight className="ml-2 h-5 w-5" />
