@@ -22,12 +22,25 @@ export default function ChartsViewer() {
 
     const { user } = useAuth();
 
+    useEffect(() => {
+        getDocumentData();
+    }, []);
+
+    const userId =
+        user?.id || new URLSearchParams(window.location.search).get("userId");
+
+    if (!userId) {
+        setError("User ID is missing");
+        setLoading(false);
+        return;
+    }
+
     const getDocumentData = async () => {
         try {
             const response = await fetch("/api/docs-get", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ uid: user.id }),
+                body: JSON.stringify({ uid: userId }),
             });
 
             if (!response.ok) {
@@ -50,10 +63,6 @@ export default function ChartsViewer() {
             setLoading(false);
         }
     };
-
-    useEffect(() => {
-        getDocumentData();
-    }, []);
 
     if (loading) {
         return (
