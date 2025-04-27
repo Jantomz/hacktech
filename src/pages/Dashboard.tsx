@@ -177,81 +177,60 @@ const Dashboard = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                                const shareLink = `${window.location.origin}/publicpre?userId=${user?.id}`;
-                                import("qrcode").then((QRCode) => {
-                                    QRCode.toDataURL(shareLink)
-                                        .then((url) => {
-                                            // Show QR Code
-                                            const qrPopup =
-                                                document.createElement("div");
-                                            qrPopup.style.position = "fixed";
-                                            qrPopup.style.bottom = "20px";
-                                            qrPopup.style.right = "20px";
-                                            qrPopup.style.backgroundColor =
-                                                "#fff";
-                                            qrPopup.style.padding = "10px 20px";
-                                            qrPopup.style.borderRadius = "5px";
-                                            qrPopup.style.boxShadow =
-                                                "0 2px 10px rgba(0, 0, 0, 0.2)";
-                                            qrPopup.style.zIndex = "1000";
+                                const popup = document.createElement("div");
+                                popup.style.position = "fixed";
+                                popup.style.bottom = "20px";
+                                popup.style.right = "20px";
+                                popup.style.backgroundColor = "#fff";
+                                popup.style.padding = "10px 20px";
+                                popup.style.borderRadius = "5px";
+                                popup.style.boxShadow =
+                                    "0 2px 10px rgba(0, 0, 0, 0.2)";
+                                popup.style.zIndex = "1000";
 
-                                            const qrImage =
-                                                document.createElement("img");
-                                            qrImage.src = url;
-                                            qrImage.style.width = "150px";
-                                            qrImage.style.height = "150px";
+                                const userIdText = document.createElement("p");
+                                userIdText.textContent = `User ID: ${user.id}`;
+                                userIdText.style.marginBottom = "10px";
 
-                                            const closeButton =
-                                                document.createElement(
-                                                    "button"
-                                                );
-                                            closeButton.textContent = "Close";
-                                            closeButton.style.marginTop =
-                                                "10px";
-                                            closeButton.style.display = "block";
-                                            closeButton.style.width = "100%";
-                                            closeButton.style.backgroundColor =
-                                                "#333";
-                                            closeButton.style.color = "#fff";
-                                            closeButton.style.border = "none";
-                                            closeButton.style.padding = "5px 0";
-                                            closeButton.style.borderRadius =
-                                                "5px";
-                                            closeButton.style.cursor =
-                                                "pointer";
+                                const copyButton =
+                                    document.createElement("button");
+                                copyButton.textContent = "Copy User ID";
+                                copyButton.style.display = "block";
+                                copyButton.style.width = "100%";
+                                copyButton.style.backgroundColor = "#007bff";
+                                copyButton.style.color = "#fff";
+                                copyButton.style.border = "none";
+                                copyButton.style.padding = "5px 0";
+                                copyButton.style.borderRadius = "5px";
+                                copyButton.style.cursor = "pointer";
+                                copyButton.style.marginBottom = "10px";
 
-                                            closeButton.onclick = () => {
-                                                document.body.removeChild(
-                                                    qrPopup
-                                                );
-                                            };
+                                copyButton.onclick = () => {
+                                    navigator.clipboard.writeText(
+                                        user.id || ""
+                                    );
+                                };
 
-                                            qrPopup.appendChild(qrImage);
-                                            qrPopup.appendChild(closeButton);
-                                            document.body.appendChild(qrPopup);
+                                const closeButton =
+                                    document.createElement("button");
+                                closeButton.textContent = "Close";
+                                closeButton.style.display = "block";
+                                closeButton.style.width = "100%";
+                                closeButton.style.backgroundColor = "#333";
+                                closeButton.style.color = "#fff";
+                                closeButton.style.border = "none";
+                                closeButton.style.padding = "5px 0";
+                                closeButton.style.borderRadius = "5px";
+                                closeButton.style.cursor = "pointer";
 
-                                            // Copy link to clipboard
-                                            navigator.clipboard
-                                                .writeText(shareLink)
-                                                .then(() => {
-                                                    console.log(
-                                                        "Link copied to clipboard"
-                                                    );
-                                                })
-                                                .catch((err) => {
-                                                    console.error(
-                                                        "Error copying link to clipboard:",
-                                                        err
-                                                    );
-                                                });
-                                        })
-                                        .catch((err) => {
-                                            console.error(
-                                                "Error generating QR code:",
-                                                err
-                                            );
-                                        });
-                                });
+                                closeButton.onclick = () => {
+                                    document.body.removeChild(popup);
+                                };
+
+                                popup.appendChild(userIdText);
+                                popup.appendChild(copyButton);
+                                popup.appendChild(closeButton);
+                                document.body.appendChild(popup);
                             }}
                         >
                             <Share className="h-4 w-4 mr-2" />

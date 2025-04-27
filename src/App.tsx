@@ -28,7 +28,6 @@ const App = () => (
                         <Route path="/signin" element={<SignIn />} />
                         <Route path="/signup" element={<SignUp />} />
                         <Route path="/preview" element={<Public />} />
-
                         <Route
                             path="/upload"
                             element={
