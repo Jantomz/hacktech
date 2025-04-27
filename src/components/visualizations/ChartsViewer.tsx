@@ -365,7 +365,6 @@ return (
                 {/* ─────── Department Breakdown Pie Chart ─────── */}
 <div className="h-[400px]">
   <h3 className="text-lg font-medium mb-2">Budget by Department</h3>
-
   <ResponsiveContainer width="100%" height="100%">
     <PieChart margin={{ top: 20, right: 30, left: 30, bottom: 40 }}>
       <Pie
@@ -406,7 +405,6 @@ return (
       {/* ⬆ keep Tooltip inside — legend handled below */}
     </PieChart>
   </ResponsiveContainer>
-
   {/* custom legend BELOW the chart */}
   <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm max-w-full overflow-hidden">
     {departmentData.map((dept, i) => (
