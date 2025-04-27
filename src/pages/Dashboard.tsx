@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BudgetBarChart from "@/components/visualizations/BudgetBarChart";
 import BudgetPieChart from "@/components/visualizations/BudgetPieChart";
 import BudgetLineChart from "@/components/visualizations/BudgetLineChart";
+import ChartsViewer from "@/components/visualizations/ChartsViewer";
 import { TimeScrubbingMap } from "@/components/maps/TimeScrubbingMap";
 import { EmailSubscription } from "@/components/budget/EmailSubscription";
 import { DocumentProcessor } from "@/components/budget/DocumentProcessor";
@@ -172,6 +173,18 @@ const Dashboard = () => {
                                 </CardHeader>
                                 <CardContent className="h-[300px]">
                                     <BudgetLineChart />
+                                </CardContent>
+                            </Card>
+
+                            <Card className="col-span-full">
+                                <CardHeader>
+                                    <CardTitle>AI-Generated Budget Analysis</CardTitle>
+                                    <CardDescription>
+                                        Analysis extracted using AI from budget documents
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <ChartsViewer />
                                 </CardContent>
                             </Card>
                         </div>
@@ -371,7 +384,7 @@ const Dashboard = () => {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    // Additional settings can be added here
+                                    {/* Additional settings can be added here */}
                                 </CardContent>
                             </Card>
                         </div>
