@@ -1,0 +1,120 @@
+export default async function handler(req, res) {
+    if (req.method !== "POST") {
+        return res.status(405).json({ error: "Method not allowed" });
+    }
+
+    const body = req.body;
+
+    const text = body.text;
+
+    try {
+        const response = await fetch(
+            "https://developer.orkescloud.com/api/workflow/get_similar_embeddings?priority=0",
+            {
+                method: "POST",
+                headers: {
+                    accept: "text/plain",
+                    "X-Authorization": process.env.ATHARVA_ORKES || "",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    text: text,
+                }),
+            }
+        );
+
+        const data = await response.text();
+        console.log("Response from Orkes API for chunk:", data);
+
+        let parsedData;
+
+        do {
+            console.log("Waiting for 2 seconds...");
+
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+
+            const workflowResponse = await fetch(
+                `https://developer.orkescloud.com/api/workflow/${data}`,
+                {
+                    method: "GET",
+                    headers: {
+                        accept: "*/*",
+                        "X-Authorization": process.env.ATHARVA_ORKES || "",
+                    },
+                }
+            );
+
+            console.log("Workflow response:", workflowResponse);
+
+            if (!workflowResponse.ok) {
+                throw new Error(
+                    `Workflow fetch failed with status ${workflowResponse.status}`
+                );
+            }
+
+            parsedData = await workflowResponse.json();
+            console.log("Workflow details:", parsedData.output.result[0].text);
+        } while (
+            parsedData.output === undefined ||
+            parsedData.output.result[0].text === undefined
+        );
+
+        console.log("Parsed data:", parsedData.output.result[0].text);
+
+        const prompt = `
+        You are a government budget interpretability assistant that helps answer questions based on the provided context, which is a transcription portion of a board meeting.
+Your goal is to provide accurate, helpful responses based only on the information given.
+If the context doesn't contain much relevant information, acknowledge that you don't have enough information.
+
+${parsedData.output.result[0].text}
+
+User question: ${text}
+
+Please provide a helpful response based on the above context.
+        
+        `;
+
+        const openaiResponse = await fetch(
+            "https://api.openai.com/v1/chat/completions",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+                },
+                body: JSON.stringify({
+                    model: "gpt-4", // Correct model name as per OpenAI documentation
+                    messages: [
+                        {
+                            role: "system",
+                            content: "You are a helpful assistant.",
+                        },
+                        { role: "user", content: prompt },
+                    ],
+                    max_tokens: 150,
+                    temperature: 0.4,
+                }),
+            }
+        );
+
+        if (!openaiResponse.ok) {
+            throw new Error(
+                `OpenAI API call failed with status ${openaiResponse.status}`
+            );
+        }
+
+        const openaiData = await openaiResponse.json();
+        console.log("Response from OpenAI:", openaiData);
+
+        const aiResponse = openaiData.choices[0]?.message;
+        if (!aiResponse) {
+            throw new Error("No response from OpenAI");
+        }
+
+        console.log("AI Response:", aiResponse);
+
+        return res.status(200).json({ data: aiResponse.content });
+    } catch (error) {
+        console.error("Error processing chunk:", error);
+    }
+}

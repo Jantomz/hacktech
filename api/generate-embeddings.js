@@ -3,28 +3,54 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: "Method not allowed" });
     }
 
-    const { text } = req.body;
+    const body = req.body;
 
-    try {
-        const response = await fetch(
-            "https://developer.orkescloud.com/api/workflow/generate_embeddings_task?priority=0",
-            {
-                method: "POST",
-                headers: {
-                    accept: "text/plain",
-                    "X-Authorization": process.env.ATHARVA_ORKES || "",
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ text }),
+    const text = body.text;
+
+    function chunkText(text, chunkSize = 500) {
+        const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+        const chunks = [];
+        let currentChunk = "";
+
+        for (const sentence of sentences) {
+            if ((currentChunk + sentence).length <= chunkSize) {
+                currentChunk += sentence;
+            } else {
+                if (currentChunk) chunks.push(currentChunk);
+                currentChunk = sentence;
             }
-        );
+        }
 
-        const data = await response.json();
+        if (currentChunk) chunks.push(currentChunk);
+        return chunks;
+    }
 
-        console.log("Response from Orkes API:", data);
-        return res.status(response.status).json(data);
-    } catch (error) {
-        console.error("Error:", error);
-        return res.status(500).json({ error: "Internal Server Error" });
+    const chunks = chunkText(text);
+
+    for (const chunk of chunks) {
+        console.log("Chunk:", chunk);
+        const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        try {
+            const response = await fetch(
+                "https://developer.orkescloud.com/api/workflow/generate_embeddings_task_2?priority=0",
+                {
+                    method: "POST",
+                    headers: {
+                        accept: "text/plain",
+                        "X-Authorization": process.env.ATHARVA_ORKES || "",
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        id: id,
+                        text: chunk,
+                    }),
+                }
+            );
+
+            const data = await response.text();
+            console.log("Response from Orkes API for chunk:", data);
+        } catch (error) {
+            console.error("Error processing chunk:", error);
+        }
     }
 }

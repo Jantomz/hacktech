@@ -21,6 +21,7 @@ import { FileText, Download, Share } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { BoardRecordingProcessor } from "@/components/budget/BoardRecordingProcessor";
 import Profile from "@/components/auth/Profile";
+import RAGBot from "@/components/budget/RAGBot";
 
 const Dashboard = () => {
     const { user } = useAuth();
@@ -401,6 +402,7 @@ const Dashboard = () => {
                     </TabsContent>
                 </Tabs>
             </div>
+            <RAGBot />
         </AppLayoutWrapper>
     );
 };
