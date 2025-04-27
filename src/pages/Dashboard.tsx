@@ -177,7 +177,7 @@ const Dashboard = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                                const shareLink = `${window.location.origin}/public?userId=${user?.id}`;
+                                const shareLink = `${window.location.origin}/preview?userId=${user?.id}`;
                                 import("qrcode").then((QRCode) => {
                                     QRCode.toDataURL(shareLink)
                                         .then((url) => {
