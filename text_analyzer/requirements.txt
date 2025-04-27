@@ -12,3 +12,4 @@ urllib3==2.2.3
 requests
 PyPDF2
 openai
+wolframalpha
