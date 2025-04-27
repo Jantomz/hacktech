@@ -17,6 +17,7 @@ import { DocumentProcessor } from "@/components/budget/DocumentProcessor";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, Share } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { BoardRecordingProcessor } from "@/components/budget/BoardRecordingProcessor";
 
 // TODO: Change the backend url
 
@@ -61,11 +62,14 @@ const Dashboard = () => {
                     onValueChange={setActiveTab}
                     className="w-full"
                 >
-                    <TabsList className="grid grid-cols-5 w-full max-w-3xl mb-8">
+                    <TabsList className="grid grid-cols-6 w-full max-w-3xl mb-8">
                         <TabsTrigger value="overview">Overview</TabsTrigger>
                         <TabsTrigger value="geographic">Geographic</TabsTrigger>
                         <TabsTrigger value="temporal">Temporal</TabsTrigger>
                         <TabsTrigger value="documents">Documents</TabsTrigger>
+                        <TabsTrigger value="recordings">
+                            Board Streams
+                        </TabsTrigger>
                         <TabsTrigger value="settings">Settings</TabsTrigger>
                     </TabsList>
 
@@ -347,6 +351,12 @@ const Dashboard = () => {
                     <TabsContent value="documents">
                         <div className="grid grid-cols-1 gap-6">
                             <DocumentProcessor />
+                        </div>
+                    </TabsContent>
+
+                    <TabsContent value="recordings">
+                        <div className="grid grid-cols-1 gap-6">
+                            <BoardRecordingProcessor />
                         </div>
                     </TabsContent>
 
