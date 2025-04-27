@@ -30,15 +30,13 @@ You are a budgeting-and-finance data-extraction assistant. Instructions:
    - year (integer)
    - department (string)
    - category (Operating, Capital, Revenue, Expense, Project)
-   - subcategory (string or null)
-   - fund_source (string or null)
+   - subcategory (string)
    - amount_usd (number, commas/$ removed)
-   - geographic_area (string or null)
-   - fiscal_period (string or null)
+   - fund_source (string)
+   - geographic_area (string)
+   - fiscal_period (string)
    - purpose (string)
 3. Normalise amounts (e.g. "$1,234" → 1234).
-4. Create separate entries for projections (mark notes = "Projected").
-5. If a field is unavailable, set it to null.
 Return valid JSON — no extra text.
 """.strip()
 
