@@ -22,10 +22,54 @@ import { useAuth } from "@/context/AuthContext";
 import { BoardRecordingProcessor } from "@/components/budget/BoardRecordingProcessor";
 import Profile from "@/components/auth/Profile";
 import RAGBot from "@/components/budget/RAGBot";
+import CountUp from "@/components/CountUp";
 
 const Dashboard = () => {
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState("overview");
+
+    const [budgetEntries, setBudgetEntries] = useState<
+        {
+            year: number;
+            department: string;
+            category: string;
+            subcategory: string;
+            amount_usd: number;
+            fund_source: string;
+            geographic_area: string;
+            fiscal_period: string;
+            purpose: string;
+        }[]
+    >([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const getDocumentData = async () => {
+        try {
+            const response = await fetch("/api/docs-get", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ uid: user.id }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to process documents");
+            }
+
+            const data = await response.json();
+            console.log("Document processing result:", data);
+            setBudgetEntries(data.entries[0].budget_entries || []);
+        } catch (error: any) {
+            console.error("Error processing documents:", error);
+            setError(error.message || "Unknown error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        getDocumentData();
+    }, []);
 
     return (
         <AppLayoutWrapper>
@@ -52,6 +96,7 @@ const Dashboard = () => {
                         <Button
                             className="bg-budget-primary hover:bg-budget-primary/90"
                             size="sm"
+                            onClick={() => setActiveTab("data")}
                         >
                             <FileText className="h-4 w-4 mr-2" />
                             Upload New Data
@@ -68,10 +113,7 @@ const Dashboard = () => {
                         <TabsTrigger value="overview">Overview</TabsTrigger>
                         <TabsTrigger value="geographic">Geographic</TabsTrigger>
                         <TabsTrigger value="temporal">Temporal</TabsTrigger>
-                        <TabsTrigger value="documents">Documents</TabsTrigger>
-                        <TabsTrigger value="recordings">
-                            Board Streams
-                        </TabsTrigger>
+                        <TabsTrigger value="data">Data Hub</TabsTrigger>
                         <TabsTrigger value="settings">Settings</TabsTrigger>
                     </TabsList>
 
@@ -82,7 +124,13 @@ const Dashboard = () => {
                                 <CardHeader>
                                     <CardTitle>Budget Summary</CardTitle>
                                     <CardDescription>
-                                        Fiscal Year 2024-2025 Budget Overview
+                                        Fiscal Year{" "}
+                                        {Math.max(
+                                            ...budgetEntries.map(
+                                                (entry) => entry.year
+                                            )
+                                        )}{" "}
+                                        Budget Overview
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
@@ -95,13 +143,169 @@ const Dashboard = () => {
                                             </CardHeader>
                                             <CardContent>
                                                 <p className="text-2xl font-bold">
-                                                    $124.5M
+                                                    <CountUp
+                                                        targetNumber={budgetEntries
+                                                            .filter(
+                                                                (entry) =>
+                                                                    entry.year ===
+                                                                    Math.max(
+                                                                        ...budgetEntries.map(
+                                                                            (
+                                                                                e
+                                                                            ) =>
+                                                                                e.year
+                                                                        )
+                                                                    )
+                                                            )
+                                                            .reduce(
+                                                                (sum, entry) =>
+                                                                    sum +
+                                                                    entry.amount_usd,
+                                                                0
+                                                            )}
+                                                        format={true}
+                                                    />
+                                                </p>
+                                                {budgetEntries.some(
+                                                    (entry) =>
+                                                        entry.year ===
+                                                        Math.max(
+                                                            ...budgetEntries.map(
+                                                                (e) => e.year
+                                                            )
+                                                        ) -
+                                                            1
+                                                ) && (
+                                                    <p className="text-xs text-muted-foreground">
+                                                        <span className="text-green-500">
+                                                            ↑{" "}
+                                                            {(
+                                                                ((budgetEntries
+                                                                    .filter(
+                                                                        (
+                                                                            entry
+                                                                        ) =>
+                                                                            entry.year ===
+                                                                            Math.max(
+                                                                                ...budgetEntries.map(
+                                                                                    (
+                                                                                        e
+                                                                                    ) =>
+                                                                                        e.year
+                                                                                )
+                                                                            )
+                                                                    )
+                                                                    .reduce(
+                                                                        (
+                                                                            sum,
+                                                                            entry
+                                                                        ) =>
+                                                                            sum +
+                                                                            entry.amount_usd,
+                                                                        0
+                                                                    ) -
+                                                                    budgetEntries
+                                                                        .filter(
+                                                                            (
+                                                                                entry
+                                                                            ) =>
+                                                                                entry.year ===
+                                                                                Math.max(
+                                                                                    ...budgetEntries.map(
+                                                                                        (
+                                                                                            e
+                                                                                        ) =>
+                                                                                            e.year
+                                                                                    )
+                                                                                ) -
+                                                                                    1
+                                                                        )
+                                                                        .reduce(
+                                                                            (
+                                                                                sum,
+                                                                                entry
+                                                                            ) =>
+                                                                                sum +
+                                                                                entry.amount_usd,
+                                                                            0
+                                                                        )) /
+                                                                    budgetEntries
+                                                                        .filter(
+                                                                            (
+                                                                                entry
+                                                                            ) =>
+                                                                                entry.year ===
+                                                                                Math.max(
+                                                                                    ...budgetEntries.map(
+                                                                                        (
+                                                                                            e
+                                                                                        ) =>
+                                                                                            e.year
+                                                                                    )
+                                                                                ) -
+                                                                                    1
+                                                                        )
+                                                                        .reduce(
+                                                                            (
+                                                                                sum,
+                                                                                entry
+                                                                            ) =>
+                                                                                sum +
+                                                                                entry.amount_usd,
+                                                                            0
+                                                                        )) *
+                                                                100
+                                                            ).toFixed(1)}
+                                                            %
+                                                        </span>{" "}
+                                                        from previous year
+                                                    </p>
+                                                )}
+                                            </CardContent>
+                                        </Card>
+
+                                        <Card>
+                                            <CardHeader className="py-4">
+                                                <CardTitle className="text-sm font-medium">
+                                                    Categories
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <p className="text-2xl font-bold">
+                                                    <CountUp
+                                                        targetNumber={
+                                                            new Set(
+                                                                budgetEntries.map(
+                                                                    (entry) =>
+                                                                        entry.subcategory
+                                                                )
+                                                            ).size
+                                                        }
+                                                    />
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">
-                                                    <span className="text-green-500">
-                                                        ↑ 4.2%
-                                                    </span>{" "}
-                                                    from previous year
+                                                    Top Category:{" "}
+                                                    {Object.entries(
+                                                        budgetEntries.reduce(
+                                                            (acc, entry) => {
+                                                                acc[
+                                                                    entry.subcategory
+                                                                ] =
+                                                                    (acc[
+                                                                        entry
+                                                                            .subcategory
+                                                                    ] || 0) +
+                                                                    entry.amount_usd;
+                                                                return acc;
+                                                            },
+                                                            {} as Record<
+                                                                string,
+                                                                number
+                                                            >
+                                                        )
+                                                    ).sort(
+                                                        (a, b) => b[1] - a[1]
+                                                    )[0]?.[0] || "N/A"}
                                                 </p>
                                             </CardContent>
                                         </Card>
@@ -109,34 +313,24 @@ const Dashboard = () => {
                                         <Card>
                                             <CardHeader className="py-4">
                                                 <CardTitle className="text-sm font-medium">
-                                                    Departments
+                                                    Funding Reasons
                                                 </CardTitle>
                                             </CardHeader>
                                             <CardContent>
                                                 <p className="text-2xl font-bold">
-                                                    12
+                                                    <CountUp
+                                                        targetNumber={
+                                                            new Set(
+                                                                budgetEntries.map(
+                                                                    (entry) =>
+                                                                        entry.purpose
+                                                                )
+                                                            ).size
+                                                        }
+                                                    />
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">
-                                                    Across 5 major categories
-                                                </p>
-                                            </CardContent>
-                                        </Card>
-
-                                        <Card>
-                                            <CardHeader className="py-4">
-                                                <CardTitle className="text-sm font-medium">
-                                                    Projects
-                                                </CardTitle>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <p className="text-2xl font-bold">
-                                                    78
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    <span className="text-green-500">
-                                                        ↑ 8
-                                                    </span>{" "}
-                                                    new projects this year
+                                                    Purposes
                                                 </p>
                                             </CardContent>
                                         </Card>
@@ -370,14 +564,9 @@ const Dashboard = () => {
                         </div>
                     </TabsContent>
 
-                    <TabsContent value="documents">
+                    <TabsContent value="data">
                         <div className="grid grid-cols-1 gap-6">
                             <DocumentProcessor />
-                        </div>
-                    </TabsContent>
-
-                    <TabsContent value="recordings">
-                        <div className="grid grid-cols-1 gap-6">
                             <BoardRecordingProcessor />
                         </div>
                     </TabsContent>

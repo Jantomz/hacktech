@@ -22,7 +22,7 @@ export default function ChartsViewer() {
 
     const { user } = useAuth();
 
-    const handleDocumentProcessing = async () => {
+    const getDocumentData = async () => {
         try {
             const response = await fetch("/api/docs-get", {
                 method: "POST",
@@ -46,7 +46,7 @@ export default function ChartsViewer() {
     };
 
     useEffect(() => {
-        handleDocumentProcessing();
+        getDocumentData();
     }, []);
 
     if (loading) {

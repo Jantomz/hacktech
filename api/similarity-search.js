@@ -5,7 +5,79 @@ export default async function handler(req, res) {
 
     const body = req.body;
 
-    const text = body.text;
+    let text = body.text;
+
+    if (!text || typeof text !== "string") {
+        return res.status(400).json({ error: "Invalid input text" });
+    }
+
+    const removeRedundantWords = (input) => {
+        const words = input.split(" ");
+        const seen = new Set();
+        return words
+            .filter((word) => {
+                const lowerWord = word.toLowerCase();
+                if (seen.has(lowerWord)) {
+                    return false;
+                }
+                seen.add(lowerWord);
+                return true;
+            })
+            .join(" ");
+    };
+
+    text = removeRedundantWords(text);
+
+    const removeStopWords = (input) => {
+        const stopWords = new Set([
+            "and",
+            "to",
+            "but",
+            "or",
+            "so",
+            "yet",
+            "for",
+            "nor",
+            "a",
+            "an",
+            "the",
+            "in",
+            "on",
+            "at",
+            "with",
+            "by",
+            "of",
+            "as",
+            "is",
+            "are",
+            "was",
+            "were",
+            "be",
+            "been",
+            "being",
+            "have",
+            "has",
+            "had",
+            "do",
+            "does",
+            "did",
+            "will",
+            "would",
+            "shall",
+            "should",
+            "can",
+            "could",
+            "may",
+            "might",
+            "must",
+        ]);
+        return input
+            .split(" ")
+            .filter((word) => !stopWords.has(word.toLowerCase()))
+            .join(" ");
+    };
+
+    text = removeStopWords(text);
 
     try {
         const response = await fetch(
@@ -62,7 +134,7 @@ export default async function handler(req, res) {
         console.log("Parsed data:", parsedData.output.result[0].text);
 
         const prompt = `
-        You are a government budget interpretability assistant that helps answer questions based on the provided context, which is a transcription portion of a board meeting.
+        You are Ava, the Atlas Virtual Assistant, a kind and high-spirited government budget interpretability assistant that helps answer questions based on the provided context, which is a transcription portion of a board meeting.
 Your goal is to provide accurate, helpful responses based only on the information given.
 If the context doesn't contain much relevant information, acknowledge that you don't have enough information.
 

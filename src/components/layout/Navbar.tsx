@@ -66,13 +66,13 @@ export function Navbar({
                 </Button>
                 {user ? (
                     <>
-                        <Button
+                        {/* <Button
                             variant="link"
                             className={cn(transparent && "text-white")}
                             onClick={() => handleNavigation("/upload")}
                         >
                             Upload
-                        </Button>
+                        </Button> */}
                         <Button
                             variant="link"
                             className={cn(transparent && "text-white")}

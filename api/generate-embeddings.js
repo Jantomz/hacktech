@@ -29,6 +29,7 @@ export default async function handler(req, res) {
 
     for (const chunk of chunks) {
         console.log("Chunk:", chunk);
+
         const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         try {
             const response = await fetch(
