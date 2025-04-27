@@ -1,4 +1,3 @@
-
 import React, { PropsWithChildren } from "react";
 import { Navbar } from "./Navbar";
 
@@ -22,13 +21,13 @@ export function AppLayout({
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 bg-budget-primary rounded-md flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">B</span>
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 flex items-center justify-center">
+                  <img src="/favicon.ico" alt="Atlas logo" className="h-10 w-10" />
                 </div>
-                <h2 className="text-xl font-bold">Budget Translator</h2>
+                <h2 className="text-xl font-bold">Atlas</h2>
               </div>
-              <p className="text-sm text-gray-300 mt-2">Making public finance transparent</p>
+              <p className="text-sm text-gray-300 mt-2">Your Map to Financial Transparency</p>
             </div>
             <div className="flex gap-8">
               <div>
@@ -52,7 +51,7 @@ export function AppLayout({
             </div>
           </div>
           <div className="mt-8 pt-4 border-t border-gray-700 text-center text-sm text-gray-400">
-            © {new Date().getFullYear()} Budget Translator. All rights reserved.
+            © {new Date().getFullYear()} Atlas. All rights reserved.
           </div>
         </div>
       </footer>
