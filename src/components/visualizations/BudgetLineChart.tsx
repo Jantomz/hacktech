@@ -1,6 +1,4 @@
-
 import React from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 // Sample data
@@ -69,38 +67,61 @@ const data = [
 
 const BudgetLineChart = () => {
   return (
-    <Card className="shadow-md">
-      <CardHeader>
-        <CardTitle>Planned vs Actual Spending (in thousands $)</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              width={500}
-              height={300}
-              data={data}
-              margin={{
-                top: 20,
-                right: 30,
-                left: 20,
-                bottom: 5,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip 
-                contentStyle={{ background: "#FFF", borderRadius: "8px", border: "none", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" }}
-              />
-              <Legend />
-              <Line type="monotone" dataKey="planned" stroke="#0D9488" activeDot={{ r: 8 }} strokeWidth={2} />
-              <Line type="monotone" dataKey="actual" stroke="#F59E0B" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="w-full h-full">
+      <ResponsiveContainer width="100%" height={300}>
+        <LineChart
+          data={data}
+          margin={{
+            top: 10,
+            right: 20,
+            left: 20,
+            bottom: 25,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" opacity={0.5} />
+          <XAxis 
+            dataKey="month" 
+            tick={{ fontSize: 12 }}
+            axisLine={{ stroke: '#E5E7EB' }}
+            tickLine={{ stroke: '#E5E7EB' }}
+          />
+          <YAxis 
+            tick={{ fontSize: 12 }}
+            axisLine={{ stroke: '#E5E7EB' }}
+            tickLine={{ stroke: '#E5E7EB' }}
+          />
+          <Tooltip 
+            contentStyle={{ 
+              background: "#FFF", 
+              borderRadius: "8px", 
+              border: "none", 
+              boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+              fontSize: "12px",
+              padding: "8px"
+            }}
+          />
+          <Legend 
+            wrapperStyle={{ paddingTop: 15, fontSize: '12px' }}
+            iconSize={10}
+          />
+          <Line 
+            type="monotone" 
+            dataKey="planned" 
+            stroke="#0D9488" 
+            activeDot={{ r: 6 }} 
+            strokeWidth={2}
+            dot={{ r: 3 }} 
+          />
+          <Line 
+            type="monotone" 
+            dataKey="actual" 
+            stroke="#F59E0B" 
+            strokeWidth={2}
+            dot={{ r: 3 }} 
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
 

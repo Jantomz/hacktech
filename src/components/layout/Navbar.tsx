@@ -43,7 +43,18 @@ export function Navbar({
             )}
         >
             <div className="flex items-center gap-3">
-                <div className="h-10 w-10 flex items-center justify-center">
+                <div 
+                    className="h-10 w-10 flex items-center justify-center cursor-pointer"
+                    onClick={() => handleNavigation("/")}
+                    aria-label="Go to home page"
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            handleNavigation("/");
+                        }
+                    }}
+                >
                     <img src="/favicon.ico" alt="Atlas logo" className="h-10 w-10" />
                 </div>
                 <div>
