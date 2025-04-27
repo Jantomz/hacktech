@@ -27,6 +27,8 @@ const App = () => (
                         <Route path="/" element={<Index />} />
                         <Route path="/signin" element={<SignIn />} />
                         <Route path="/signup" element={<SignUp />} />
+                        <Route path="/preview" element={<Public />} />
+
                         <Route
                             path="/upload"
                             element={
@@ -43,7 +45,6 @@ const App = () => (
                                 </ProtectedRoute>
                             }
                         />
-                        <Route path="/preview" element={<Public />} />
 
                         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                         <Route path="*" element={<NotFound />} />

@@ -177,7 +177,7 @@ const Dashboard = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                                const shareLink = `${window.location.origin}/preview?userId=${user?.id}`;
+                                const shareLink = `${window.location.origin}/publicpre?userId=${user?.id}`;
                                 import("qrcode").then((QRCode) => {
                                     QRCode.toDataURL(shareLink)
                                         .then((url) => {
@@ -257,14 +257,14 @@ const Dashboard = () => {
                             <Share className="h-4 w-4 mr-2" />
                             Share
                         </Button>
-                        <Button
+                        {/* <Button
                             className="bg-budget-primary hover:bg-budget-primary/90"
                             size="sm"
                             onClick={() => setActiveTab("data")}
                         >
                             <FileText className="h-4 w-4 mr-2" />
                             Upload New Data
-                        </Button>
+                        </Button> */}
                     </div>
                 </div>
 
