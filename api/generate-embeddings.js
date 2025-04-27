@@ -7,6 +7,30 @@ export default async function handler(req, res) {
 
     const text = body.text;
 
+    const tokenResponse = await fetch(
+        "https://developer.orkescloud.com/api/token",
+        {
+            method: "POST",
+            headers: {
+                accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                keyId: process.env.ATHARVA_KEY_ID || "",
+                keySecret: process.env.ATHARVA_KEY_SECRET || "",
+            }),
+        }
+    );
+
+    if (!tokenResponse.ok) {
+        throw new Error(
+            `Token request failed with status ${tokenResponse.status}`
+        );
+    }
+
+    const tokenData = await tokenResponse.json();
+    console.log("Token response:", tokenData);
+
     function chunkText(text, chunkSize = 500) {
         const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
         const chunks = [];
@@ -38,7 +62,7 @@ export default async function handler(req, res) {
                     method: "POST",
                     headers: {
                         accept: "text/plain",
-                        "X-Authorization": process.env.ATHARVA_ORKES || "",
+                        "X-Authorization": tokenData.token || "",
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
