@@ -11,6 +11,8 @@ import { DocumentProcessor } from "@/components/budget/DocumentProcessor";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, Share } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import ChartsViewer from "@/components/visualizations/ChartsViewer";
+
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -128,6 +130,18 @@ const Dashboard = () => {
                   <BudgetLineChart />
                 </CardContent>
               </Card>
+
+              <Card className="col-span-full">
+              <CardHeader>
+                <CardTitle>AI-Generated Budget Analysis</CardTitle>
+                <CardDescription>
+                  Analysis extracted using AI from budget documents
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartsViewer />
+              </CardContent>
+            </Card>
             </div>
           </TabsContent>
           

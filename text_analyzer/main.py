@@ -1,6 +1,7 @@
 from conductor.client.automator.task_handler import TaskHandler
 from conductor.client.configuration.configuration import Configuration
-import worker  # noqa: F401  (registers the budget_extract worker)
+import worker          # registers budget_extract
+import graphs_worker   # registers budget_graph_recs   ← NEW
 
 def main():
     cfg = Configuration()
