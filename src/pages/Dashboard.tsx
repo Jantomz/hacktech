@@ -13,12 +13,14 @@ import BudgetPieChart from "@/components/visualizations/BudgetPieChart";
 import BudgetLineChart from "@/components/visualizations/BudgetLineChart";
 import ChartsViewer from "@/components/visualizations/ChartsViewer";
 import { TimeScrubbingMap } from "@/components/maps/TimeScrubbingMap";
+import BudgetMap from "@/components/maps/BudgetMap";
 import { EmailSubscription } from "@/components/budget/EmailSubscription";
 import { DocumentProcessor } from "@/components/budget/DocumentProcessor";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, Share } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { BoardRecordingProcessor } from "@/components/budget/BoardRecordingProcessor";
+import Profile from "@/components/auth/Profile";
 
 const Dashboard = () => {
     const { user } = useAuth();
@@ -206,6 +208,7 @@ const Dashboard = () => {
                                 </CardHeader>
                                 <CardContent className="h-[500px]">
                                     <TimeScrubbingMap />
+                                    {/* <BudgetMap /> */}
                                 </CardContent>
                             </Card>
 
@@ -375,19 +378,16 @@ const Dashboard = () => {
                     </TabsContent>
 
                     <TabsContent value="settings">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <EmailSubscription />
+                        <div className="grid grid-cols-1 gap-6">
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>
-                                        Notification Preferences
-                                    </CardTitle>
+                                    <CardTitle>Profile</CardTitle>
                                     <CardDescription>
-                                        Manage your budget update notifications
+                                        Manage your city profile
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    {/* Additional settings can be added here */}
+                                    <Profile />
                                 </CardContent>
                             </Card>
                         </div>
