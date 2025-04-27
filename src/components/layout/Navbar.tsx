@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, LogOut, User } from "lucide-react";
+import { ArrowRight, LogOut, User, Home, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -76,13 +76,19 @@ export function Navbar({
             </div>
 
             <div className="absolute left-1/2 transform -translate-x-1/2">
-                <nav className="hidden md:flex items-center gap-6">
+                <nav className="hidden md:flex items-center gap-4">
                     <Button
-                        variant="link"
-                        className={cn(transparent && "text-white")}
+                        variant="outline"
+                        size="lg"
+                        className={cn(
+                            "font-medium px-5 rounded-md transition-all hover:scale-105",
+                            transparent 
+                                ? "text-white bg-white/10 hover:bg-white/20 border-white/20" 
+                                : "bg-gray-50 hover:bg-gray-100 border-gray-200"
+                        )}
                         onClick={() => handleNavigation("/")}
                     >
-                        Home
+                        <Home className="h-4 w-4 mr-2" /> Home
                     </Button>
                     {user ? (
                         <>
@@ -94,11 +100,17 @@ export function Navbar({
                                 Upload
                             </Button> */}
                             <Button
-                                variant="link"
-                                className={cn(transparent && "text-white")}
+                                variant="outline"
+                                size="lg"
+                                className={cn(
+                                    "font-medium px-5 rounded-md transition-all hover:scale-105",
+                                    transparent 
+                                        ? "text-white bg-white/10 hover:bg-white/20 border-white/20" 
+                                        : "bg-gray-50 hover:bg-gray-100 border-gray-200"
+                                )}
                                 onClick={() => handleNavigation("/dashboard")}
                             >
-                                Dashboard
+                                <LayoutDashboard className="h-4 w-4 mr-2" /> Dashboard
                             </Button>
                         </>
                     ) : null}
