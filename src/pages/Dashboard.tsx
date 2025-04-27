@@ -19,6 +19,8 @@ import { FileText, Download, Share } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { BoardRecordingProcessor } from "@/components/budget/BoardRecordingProcessor";
 
+// TODO: Change the backend url
+
 const Dashboard = () => {
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState("overview");
