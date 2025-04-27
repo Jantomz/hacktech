@@ -47,10 +47,10 @@ const Index = () => {
             <section className="py-16 px-4 bg-gray-100">
                 <div className="container mx-auto max-w-md text-center">
                     <h2 className="text-2xl md:text-3xl font-bold mb-4">
-                        Enter Cities' Access Code
+                        Enter Your City's Access Code
                     </h2>
                     <p className="text-muted-foreground mb-6">
-                        Input a unique code to access your cities' budget
+                        Input a unique code to access your city's budget
                         dashboard.
                     </p>
                     <form
