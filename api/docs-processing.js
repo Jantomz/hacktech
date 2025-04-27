@@ -9,6 +9,30 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: "Method not allowed" });
     }
 
+    const tokenResponse = await fetch(
+        "https://developer.orkescloud.com/api/token",
+        {
+            method: "POST",
+            headers: {
+                accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                keyId: process.env.ANAIS_KEY_ID || "",
+                keySecret: process.env.ANAIS_KEY_SECRET || "",
+            }),
+        }
+    );
+
+    if (!tokenResponse.ok) {
+        throw new Error(
+            `Token request failed with status ${tokenResponse.status}`
+        );
+    }
+
+    const tokenData = await tokenResponse.json();
+    console.log("Token response:", tokenData);
+
     const { documentUrl, uid } = req.body;
 
     try {
@@ -18,7 +42,7 @@ export default async function handler(req, res) {
                 method: "POST",
                 headers: {
                     accept: "text/plain",
-                    "X-Authorization": process.env.ANAIS_ORKES || "",
+                    "X-Authorization": tokenData.token || "",
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
@@ -49,7 +73,7 @@ export default async function handler(req, res) {
                     method: "GET",
                     headers: {
                         accept: "*/*",
-                        "X-Authorization": process.env.ANAIS_ORKES || "",
+                        "X-Authorization": tokenData.token || "",
                     },
                 }
             );
