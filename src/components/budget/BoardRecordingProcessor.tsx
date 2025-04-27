@@ -61,6 +61,8 @@ export const BoardRecordingProcessor = () => {
         e.preventDefault();
         if (!url) return;
 
+        let completeTransription = "";
+
         setIsProcessing(true);
         setFiles([]);
         try {
@@ -97,66 +99,74 @@ export const BoardRecordingProcessor = () => {
             }));
             setFiles(initialFiles);
 
-            for (const audioFile of audioFilesData.files) {
+            // TODO: Process more
+            const audioFile = audioFilesData.files[0]; // Only process the first audio file
+            setFiles((prevFiles) =>
+                prevFiles.map((file) =>
+                    file.name === audioFile.name
+                        ? { ...file, status: "processing" }
+                        : file
+                )
+            );
+
+            updateProgress(audioFile.name, 100); // Start pseudo-progress to a random value between 70 and 80
+
+            try {
+                const response = await fetch("/api/media-processing", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        audioUrl: `${url}/${audioFile.name}`,
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(
+                        `Failed to process the file: ${audioFile.name}`
+                    );
+                }
+                const data = await response.json();
+                console.log(`Processing result for ${audioFile.name}:`, data);
+
+                completeTransription += data.transcription + " ";
+
                 setFiles((prevFiles) =>
                     prevFiles.map((file) =>
                         file.name === audioFile.name
-                            ? { ...file, status: "processing" }
+                            ? { ...file, status: "completed" }
                             : file
                     )
                 );
-
-                updateProgress(audioFile.name, 100); // Start pseudo-progress to a random value between 70 and 80
-
-                try {
-                    const response = await fetch("/api/media-processing", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            audioUrl: `${url}/${audioFile.name}`,
-                        }),
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(
-                            `Failed to process the file: ${audioFile.name}`
-                        );
-                    }
-                    const data = await response.json();
-                    console.log(
-                        `Processing result for ${audioFile.name}:`,
-                        data
-                    );
-
-                    setFiles((prevFiles) =>
-                        prevFiles.map((file) =>
-                            file.name === audioFile.name
-                                ? { ...file, status: "completed" }
-                                : file
-                        )
-                    );
-                    updateProgress(audioFile.name, 100); // Complete progress to 100%
-                } catch (error) {
-                    console.error(
-                        `Error processing file ${audioFile.name}:`,
-                        error
-                    );
-                    setFiles((prevFiles) =>
-                        prevFiles.map((file) =>
-                            file.name === audioFile.name
-                                ? { ...file, status: "failed" }
-                                : file
-                        )
-                    );
-                }
+                updateProgress(audioFile.name, 100); // Complete progress to 100%
+            } catch (error) {
+                console.error(
+                    `Error processing file ${audioFile.name}:`,
+                    error
+                );
+                setFiles((prevFiles) =>
+                    prevFiles.map((file) =>
+                        file.name === audioFile.name
+                            ? { ...file, status: "failed" }
+                            : file
+                    )
+                );
             }
 
             toast({
                 title: "Processing completed",
                 description: "All recordings have been processed successfully.",
             });
+
+            await fetch("/api/generate-embeddings", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ text: completeTransription }),
+            });
+
             setUrl("");
         } catch (error) {
             console.error("Error processing recordings:", error);

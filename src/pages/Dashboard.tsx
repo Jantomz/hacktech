@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { AppLayoutWrapper } from "@/components/layout/AppLayoutWrapper";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BudgetBarChart from "@/components/visualizations/BudgetBarChart";
@@ -13,163 +13,584 @@ import BudgetPieChart from "@/components/visualizations/BudgetPieChart";
 import BudgetLineChart from "@/components/visualizations/BudgetLineChart";
 import ChartsViewer from "@/components/visualizations/ChartsViewer";
 import { TimeScrubbingMap } from "@/components/maps/TimeScrubbingMap";
+import BudgetMap from "@/components/maps/BudgetMap";
 import { EmailSubscription } from "@/components/budget/EmailSubscription";
 import { DocumentProcessor } from "@/components/budget/DocumentProcessor";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, Share } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { BoardRecordingProcessor } from "@/components/budget/BoardRecordingProcessor";
+import Profile from "@/components/auth/Profile";
+import RAGBot from "@/components/budget/RAGBot";
+import CountUp from "@/components/CountUp";
 
 const Dashboard = () => {
-  const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("overview");
+    const { user } = useAuth();
+    const [activeTab, setActiveTab] = useState("overview");
 
-  return (
-    <AppLayoutWrapper>
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Budget Dashboard</h1>
-            <p className="text-muted-foreground">
-              Interactive visualizations of your government's budget data
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Export Data
-            </Button>
-            <Button variant="outline" size="sm">
-              <Share className="h-4 w-4 mr-2" />
-              Share
-            </Button>
-            <Button className="bg-budget-primary hover:bg-budget-primary/90" size="sm">
-              <FileText className="h-4 w-4 mr-2" />
-              Upload New Data
-            </Button>
-          </div>
-        </div>
+    const [budgetEntries, setBudgetEntries] = useState<
+        {
+            year: number;
+            department: string;
+            category: string;
+            subcategory: string;
+            amount_usd: number;
+            fund_source: string;
+            geographic_area: string;
+            fiscal_period: string;
+            purpose: string;
+        }[]
+    >([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-        <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-6 w-full max-w-3xl mb-8">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="geographic">Geographic</TabsTrigger>
-            <TabsTrigger value="temporal">Temporal</TabsTrigger>
-            <TabsTrigger value="documents">Documents</TabsTrigger>
-            <TabsTrigger value="recordings">Board Streams</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-          </TabsList>
+    const getDocumentData = async () => {
+        try {
+            const response = await fetch("/api/docs-get", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ uid: user.id }),
+            });
 
-          <TabsContent value="overview">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Budget Summary */}
-              <Card className="col-span-full">
-                <CardHeader>
-                  <CardTitle>Budget Summary</CardTitle>
-                  <CardDescription>
-                    Fiscal Year 2024-2025 Budget Overview
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card>
-                      <CardHeader className="py-4">
-                        <CardTitle className="text-sm font-medium">
-                          Total Budget
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-2xl font-bold">$124.5M</p>
-                        <p className="text-xs text-muted-foreground">
-                          <span className="text-green-500">↑ 4.2%</span> from previous year
+            if (!response.ok) {
+                throw new Error("Failed to process documents");
+            }
+
+            const data = await response.json();
+            console.log("Document processing result:", data);
+            setBudgetEntries(data.entries[0].budget_entries || []);
+        } catch (error: any) {
+            console.error("Error processing documents:", error);
+            setError(error.message || "Unknown error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        getDocumentData();
+    }, []);
+
+    return (
+        <AppLayoutWrapper>
+            <div className="container mx-auto py-8 px-4">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold mb-2">
+                            Budget Dashboard
+                        </h1>
+                        <p className="text-muted-foreground">
+                            Interactive visualizations of your government's
+                            budget data
                         </p>
-                      </CardContent>
-                    </Card>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="sm">
+                            <Download className="h-4 w-4 mr-2" />
+                            Export Data
+                        </Button>
+                        <Button variant="outline" size="sm">
+                            <Share className="h-4 w-4 mr-2" />
+                            Share
+                        </Button>
+                        <Button
+                            className="bg-budget-primary hover:bg-budget-primary/90"
+                            size="sm"
+                            onClick={() => setActiveTab("data")}
+                        >
+                            <FileText className="h-4 w-4 mr-2" />
+                            Upload New Data
+                        </Button>
+                    </div>
+                </div>
 
-                    <Card>
-                      <CardHeader className="py-4">
-                        <CardTitle className="text-sm font-medium">
-                          Departments
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-2xl font-bold">12</p>
-                        <p className="text-xs text-muted-foreground">
-                          Across 5 major categories
-                        </p>
-                      </CardContent>
-                    </Card>
+                <Tabs
+                    defaultValue={activeTab}
+                    onValueChange={setActiveTab}
+                    className="w-full"
+                >
+                    <TabsList className="grid grid-cols-6 w-full max-w-3xl mb-8">
+                        <TabsTrigger value="overview">Overview</TabsTrigger>
+                        <TabsTrigger value="geographic">Geographic</TabsTrigger>
+                        <TabsTrigger value="temporal">Temporal</TabsTrigger>
+                        <TabsTrigger value="data">Data Hub</TabsTrigger>
+                        <TabsTrigger value="settings">Settings</TabsTrigger>
+                    </TabsList>
 
-                    <Card>
-                      <CardHeader className="py-4">
-                        <CardTitle className="text-sm font-medium">
-                          Projects
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-2xl font-bold">78</p>
-                        <p className="text-xs text-muted-foreground">
-                          <span className="text-green-500">↑ 8</span> new projects this year
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </CardContent>
-              </Card>
+                    <TabsContent value="overview">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* Budget Summary */}
+                            <Card className="col-span-full">
+                                <CardHeader>
+                                    <CardTitle>Budget Summary</CardTitle>
+                                    <CardDescription>
+                                        Fiscal Year{" "}
+                                        {Math.max(
+                                            ...budgetEntries.map(
+                                                (entry) => entry.year
+                                            )
+                                        )}{" "}
+                                        Budget Overview
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <Card>
+                                            <CardHeader className="py-4">
+                                                <CardTitle className="text-sm font-medium">
+                                                    Total Budget
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <p className="text-2xl font-bold">
+                                                    <CountUp
+                                                        targetNumber={budgetEntries
+                                                            .filter(
+                                                                (entry) =>
+                                                                    entry.year ===
+                                                                    Math.max(
+                                                                        ...budgetEntries.map(
+                                                                            (
+                                                                                e
+                                                                            ) =>
+                                                                                e.year
+                                                                        )
+                                                                    )
+                                                            )
+                                                            .reduce(
+                                                                (sum, entry) =>
+                                                                    sum +
+                                                                    entry.amount_usd,
+                                                                0
+                                                            )}
+                                                        format={true}
+                                                    />
+                                                </p>
+                                                {budgetEntries.some(
+                                                    (entry) =>
+                                                        entry.year ===
+                                                        Math.max(
+                                                            ...budgetEntries.map(
+                                                                (e) => e.year
+                                                            )
+                                                        ) -
+                                                            1
+                                                ) && (
+                                                    <p className="text-xs text-muted-foreground">
+                                                        <span className="text-green-500">
+                                                            ↑{" "}
+                                                            {(
+                                                                ((budgetEntries
+                                                                    .filter(
+                                                                        (
+                                                                            entry
+                                                                        ) =>
+                                                                            entry.year ===
+                                                                            Math.max(
+                                                                                ...budgetEntries.map(
+                                                                                    (
+                                                                                        e
+                                                                                    ) =>
+                                                                                        e.year
+                                                                                )
+                                                                            )
+                                                                    )
+                                                                    .reduce(
+                                                                        (
+                                                                            sum,
+                                                                            entry
+                                                                        ) =>
+                                                                            sum +
+                                                                            entry.amount_usd,
+                                                                        0
+                                                                    ) -
+                                                                    budgetEntries
+                                                                        .filter(
+                                                                            (
+                                                                                entry
+                                                                            ) =>
+                                                                                entry.year ===
+                                                                                Math.max(
+                                                                                    ...budgetEntries.map(
+                                                                                        (
+                                                                                            e
+                                                                                        ) =>
+                                                                                            e.year
+                                                                                    )
+                                                                                ) -
+                                                                                    1
+                                                                        )
+                                                                        .reduce(
+                                                                            (
+                                                                                sum,
+                                                                                entry
+                                                                            ) =>
+                                                                                sum +
+                                                                                entry.amount_usd,
+                                                                            0
+                                                                        )) /
+                                                                    budgetEntries
+                                                                        .filter(
+                                                                            (
+                                                                                entry
+                                                                            ) =>
+                                                                                entry.year ===
+                                                                                Math.max(
+                                                                                    ...budgetEntries.map(
+                                                                                        (
+                                                                                            e
+                                                                                        ) =>
+                                                                                            e.year
+                                                                                    )
+                                                                                ) -
+                                                                                    1
+                                                                        )
+                                                                        .reduce(
+                                                                            (
+                                                                                sum,
+                                                                                entry
+                                                                            ) =>
+                                                                                sum +
+                                                                                entry.amount_usd,
+                                                                            0
+                                                                        )) *
+                                                                100
+                                                            ).toFixed(1)}
+                                                            %
+                                                        </span>{" "}
+                                                        from previous year
+                                                    </p>
+                                                )}
+                                            </CardContent>
+                                        </Card>
 
-              {/* Other Charts */}
-              <Card className="lg:col-span-2">
-                <CardHeader>
-                  <CardTitle>Department Allocations</CardTitle>
-                  <CardDescription>Budget by department</CardDescription>
-                </CardHeader>
-                <CardContent className="h-[300px]">
-                  <BudgetBarChart />
-                </CardContent>
-              </Card>
+                                        <Card>
+                                            <CardHeader className="py-4">
+                                                <CardTitle className="text-sm font-medium">
+                                                    Categories
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <p className="text-2xl font-bold">
+                                                    <CountUp
+                                                        targetNumber={
+                                                            new Set(
+                                                                budgetEntries.map(
+                                                                    (entry) =>
+                                                                        entry.subcategory
+                                                                )
+                                                            ).size
+                                                        }
+                                                    />
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Top Category:{" "}
+                                                    {Object.entries(
+                                                        budgetEntries.reduce(
+                                                            (acc, entry) => {
+                                                                acc[
+                                                                    entry.subcategory
+                                                                ] =
+                                                                    (acc[
+                                                                        entry
+                                                                            .subcategory
+                                                                    ] || 0) +
+                                                                    entry.amount_usd;
+                                                                return acc;
+                                                            },
+                                                            {} as Record<
+                                                                string,
+                                                                number
+                                                            >
+                                                        )
+                                                    ).sort(
+                                                        (a, b) => b[1] - a[1]
+                                                    )[0]?.[0] || "N/A"}
+                                                </p>
+                                            </CardContent>
+                                        </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Spending Categories</CardTitle>
-                  <CardDescription>Budget distribution</CardDescription>
-                </CardHeader>
-                <CardContent className="h-[300px]">
-                  <BudgetPieChart />
-                </CardContent>
-              </Card>
+                                        <Card>
+                                            <CardHeader className="py-4">
+                                                <CardTitle className="text-sm font-medium">
+                                                    Funding Reasons
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <p className="text-2xl font-bold">
+                                                    <CountUp
+                                                        targetNumber={
+                                                            new Set(
+                                                                budgetEntries.map(
+                                                                    (entry) =>
+                                                                        entry.purpose
+                                                                )
+                                                            ).size
+                                                        }
+                                                    />
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Purposes
+                                                </p>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                </CardContent>
+                            </Card>
 
-              <Card className="col-span-full">
-                <CardHeader>
-                  <CardTitle>Budget Trends</CardTitle>
-                  <CardDescription>5-year historical view</CardDescription>
-                </CardHeader>
-                <CardContent className="h-[300px]">
-                  <BudgetLineChart />
-                </CardContent>
-              </Card>
+                            {/* Other Charts */}
+                            <Card className="lg:col-span-2">
+                                <CardHeader>
+                                    <CardTitle>
+                                        Department Allocations
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Budget by department
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="h-[300px]">
+                                    <BudgetBarChart />
+                                </CardContent>
+                            </Card>
 
-              {/* AI-Generated Budget Analysis */}
-              <Card className="col-span-full">
-                <CardHeader>
-                  <CardTitle>AI-Generated Budget Analysis</CardTitle>
-                  <CardDescription>
-                    Analysis extracted using AI from budget documents
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartsViewer />
-                </CardContent>
-              </Card>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Spending Categories</CardTitle>
+                                    <CardDescription>
+                                        Budget distribution
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="h-[300px]">
+                                    <BudgetPieChart />
+                                </CardContent>
+                            </Card>
+
+                            <Card className="col-span-full">
+                                <CardHeader>
+                                    <CardTitle>Budget Trends</CardTitle>
+                                    <CardDescription>
+                                        5-year historical view
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="h-[300px]">
+                                    <BudgetLineChart />
+                                </CardContent>
+                            </Card>
+
+                            {/* AI-Generated Budget Analysis */}
+                            <Card className="col-span-full">
+                                <CardHeader>
+                                    <CardTitle>
+                                        AI-Generated Budget Analysis
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Analysis extracted using AI from budget
+                                        documents
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <ChartsViewer />
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </TabsContent>
+
+                    <TabsContent value="geographic">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <Card className="lg:col-span-2">
+                                <CardHeader>
+                                    <CardTitle>
+                                        Geographic Budget Distribution
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Interactive map with time scrubbing
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="h-[500px]">
+                                    <TimeScrubbingMap />
+                                </CardContent>
+                            </Card>
+
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>District Breakdown</CardTitle>
+                                    <CardDescription>
+                                        Budget allocation by district
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    {[
+                                        "Downtown",
+                                        "Westside",
+                                        "Eastside",
+                                        "Northside",
+                                        "Southside",
+                                    ].map((district) => (
+                                        <div
+                                            key={district}
+                                            className="flex justify-between items-center"
+                                        >
+                                            <div>
+                                                <p className="font-medium">
+                                                    {district}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Various projects
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="font-medium">
+                                                    $
+                                                    {(
+                                                        Math.random() * 800000 +
+                                                        200000
+                                                    )
+                                                        .toFixed(0)
+                                                        .replace(
+                                                            /\B(?=(\d{3})+(?!\d))/g,
+                                                            ","
+                                                        )}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {Math.floor(
+                                                        Math.random() * 20
+                                                    ) + 5}{" "}
+                                                    projects
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </TabsContent>
+
+                    <TabsContent value="temporal">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <Card className="col-span-full">
+                                <CardHeader>
+                                    <CardTitle>Budget Evolution</CardTitle>
+                                    <CardDescription>
+                                        Year-over-year changes in major spending
+                                        categories
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="h-[400px]">
+                                    <BudgetLineChart />
+                                </CardContent>
+                            </Card>
+
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Spending Velocity</CardTitle>
+                                    <CardDescription>
+                                        Monthly expenditure rate
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="h-[300px]">
+                                    <BudgetBarChart />
+                                </CardContent>
+                            </Card>
+
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Fiscal Calendar</CardTitle>
+                                    <CardDescription>
+                                        Key budget milestones and events
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-4">
+                                        {[
+                                            {
+                                                date: "Jan 15, 2024",
+                                                event: "Budget Planning Begins",
+                                                status: "Completed",
+                                            },
+                                            {
+                                                date: "Mar 5, 2024",
+                                                event: "Department Submissions Due",
+                                                status: "Completed",
+                                            },
+                                            {
+                                                date: "Apr 20, 2024",
+                                                event: "Public Budget Hearings",
+                                                status: "Completed",
+                                            },
+                                            {
+                                                date: "Jun 1, 2024",
+                                                event: "Budget Approval",
+                                                status: "Completed",
+                                            },
+                                            {
+                                                date: "Jul 1, 2024",
+                                                event: "Fiscal Year Begins",
+                                                status: "In Progress",
+                                            },
+                                            {
+                                                date: "Oct 15, 2024",
+                                                event: "Q1 Budget Review",
+                                                status: "Upcoming",
+                                            },
+                                        ].map((item, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-start"
+                                            >
+                                                <div
+                                                    className={`h-4 w-4 rounded-full mt-1 mr-3 ${
+                                                        item.status ===
+                                                        "Completed"
+                                                            ? "bg-green-500"
+                                                            : item.status ===
+                                                              "In Progress"
+                                                            ? "bg-blue-500"
+                                                            : "bg-gray-300"
+                                                    }`}
+                                                ></div>
+                                                <div>
+                                                    <p className="font-medium">
+                                                        {item.event}
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {item.date}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </TabsContent>
+
+                    <TabsContent value="data">
+                        <div className="grid grid-cols-1 gap-6">
+                            <DocumentProcessor />
+                            <BoardRecordingProcessor />
+                        </div>
+                    </TabsContent>
+
+                    <TabsContent value="settings">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Profile</CardTitle>
+                                    <CardDescription>
+                                        Manage your city profile
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <Profile />
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </TabsContent>
+                </Tabs>
             </div>
-          </TabsContent>
-
-          {/* Other tabs like Geographic, Temporal, Documents, Recordings, Settings (no change) */}
-
-          {/* you can keep the rest exactly the same */}
-        </Tabs>
-      </div>
-    </AppLayoutWrapper>
-  );
+            <RAGBot />
+        </AppLayoutWrapper>
+    );
 };
 
 export default Dashboard;

@@ -13,7 +13,7 @@ const Index = () => {
                 <div className="container mx-auto h-full flex flex-col justify-center items-center pt-16 px-4">
                     <div className="max-w-3xl text-center animate-fade-in">
                         <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-                            Making Public Finance Transparent
+                            Atlas: Your Map to Financial Transparency
                         </h1>
                         <p className="text-xl md:text-2xl text-white/90 mb-8">
                             Transform complex budget documents into clear

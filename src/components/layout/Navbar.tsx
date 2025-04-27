@@ -42,47 +42,57 @@ export function Navbar({
                     : "bg-background border-b"
             )}
         >
-            <div className="flex items-center gap-2">
-                <div className="h-8 w-8 bg-budget-primary rounded-md flex items-center justify-center">
-                    <span className="text-white font-bold text-xl">B</span>
+            <div className="flex items-center gap-3">
+                <div className="h-10 w-10 flex items-center justify-center">
+                    <img src="/favicon.ico" alt="Atlas logo" className="h-10 w-10" />
                 </div>
-                <h1
-                    className={cn(
-                        "text-xl font-bold",
-                        transparent && "text-white"
-                    )}
-                >
-                    Budget Translator
-                </h1>
+                <div>
+                    <h1
+                        className={cn(
+                            "text-xl font-bold",
+                            transparent && "text-white"
+                        )}
+                    >
+                        Atlas
+                    </h1>
+                    <p className={cn(
+                        "text-xs",
+                        transparent && "text-white/80"
+                    )}>
+                        Your Map to Financial Transparency
+                    </p>
+                </div>
             </div>
 
-            <nav className="hidden md:flex items-center gap-6">
-                <Button
-                    variant="link"
-                    className={cn(transparent && "text-white")}
-                    onClick={() => handleNavigation("/")}
-                >
-                    Home
-                </Button>
-                {user ? (
-                    <>
-                        <Button
-                            variant="link"
-                            className={cn(transparent && "text-white")}
-                            onClick={() => handleNavigation("/upload")}
-                        >
-                            Upload
-                        </Button>
-                        <Button
-                            variant="link"
-                            className={cn(transparent && "text-white")}
-                            onClick={() => handleNavigation("/dashboard")}
-                        >
-                            Dashboard
-                        </Button>
-                    </>
-                ) : null}
-            </nav>
+            <div className="absolute left-1/2 transform -translate-x-1/2">
+                <nav className="hidden md:flex items-center gap-6">
+                    <Button
+                        variant="link"
+                        className={cn(transparent && "text-white")}
+                        onClick={() => handleNavigation("/")}
+                    >
+                        Home
+                    </Button>
+                    {user ? (
+                        <>
+                            {/* <Button
+                                variant="link"
+                                className={cn(transparent && "text-white")}
+                                onClick={() => handleNavigation("/upload")}
+                            >
+                                Upload
+                            </Button> */}
+                            <Button
+                                variant="link"
+                                className={cn(transparent && "text-white")}
+                                onClick={() => handleNavigation("/dashboard")}
+                            >
+                                Dashboard
+                            </Button>
+                        </>
+                    ) : null}
+                </nav>
+            </div>
 
             {user ? (
                 <DropdownMenu>
