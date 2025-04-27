@@ -76,6 +76,7 @@ const Dashboard = () => {
 
                     <TabsContent value="overview">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* Budget Summary */}
                             <Card className="col-span-full">
                                 <CardHeader>
                                     <CardTitle>Budget Summary</CardTitle>
@@ -103,6 +104,7 @@ const Dashboard = () => {
                                                 </p>
                                             </CardContent>
                                         </Card>
+
                                         <Card>
                                             <CardHeader className="py-4">
                                                 <CardTitle className="text-sm font-medium">
@@ -118,6 +120,7 @@ const Dashboard = () => {
                                                 </p>
                                             </CardContent>
                                         </Card>
+
                                         <Card>
                                             <CardHeader className="py-4">
                                                 <CardTitle className="text-sm font-medium">
@@ -140,6 +143,7 @@ const Dashboard = () => {
                                 </CardContent>
                             </Card>
 
+                            {/* Other Charts */}
                             <Card className="lg:col-span-2">
                                 <CardHeader>
                                     <CardTitle>
@@ -178,6 +182,7 @@ const Dashboard = () => {
                                 </CardContent>
                             </Card>
 
+                            {/* AI-Generated Budget Analysis */}
                             <Card className="col-span-full">
                                 <CardHeader>
                                     <CardTitle>
@@ -208,7 +213,6 @@ const Dashboard = () => {
                                 </CardHeader>
                                 <CardContent className="h-[500px]">
                                     <TimeScrubbingMap />
-                                    {/* <BudgetMap /> */}
                                 </CardContent>
                             </Card>
 
@@ -378,16 +382,19 @@ const Dashboard = () => {
                     </TabsContent>
 
                     <TabsContent value="settings">
-                        <div className="grid grid-cols-1 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <EmailSubscription />
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Profile</CardTitle>
+                                    <CardTitle>
+                                        Notification Preferences
+                                    </CardTitle>
                                     <CardDescription>
-                                        Manage your city profile
+                                        Manage your budget update notifications
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <Profile />
+                                    {/* Additional settings can be added here */}
                                 </CardContent>
                             </Card>
                         </div>
