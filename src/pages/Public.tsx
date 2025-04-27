@@ -33,6 +33,25 @@ const Public = () => {
         }
     }, []);
 
+    const getSentiment = async ({ commentMess }) => {
+        try {
+            const response = await fetch("/api/sentiment-analysis", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: commentMess }),
+            });
+            if (!response.ok) {
+                throw new Error("Failed to fetch sentiment data");
+            }
+            const data = await response.json();
+            console.log("Sentiment data:", data);
+            return data;
+        } catch (error) {
+            console.error("Error fetching sentiment data:", error);
+            return null;
+        }
+    };
+
     const [profile, setProfile] = useState({
         name: "",
         city: "",
@@ -93,6 +112,54 @@ const Public = () => {
                 setLoading(false);
             });
     }, [userId]);
+
+    const comments = [
+        {
+            id: 1,
+            text: "This is a great initiative! Looking forward to seeing the results.",
+            timestamp: "2025-04-26T11:10:04Z",
+        },
+        {
+            id: 2,
+            text: "I have some concerns about the budget allocation. Can we get more details?",
+            timestamp: "2025-04-26T11:10:40Z",
+        },
+        {
+            id: 3,
+            text: "I appreciate the transparency in sharing this information. Thank you!",
+            timestamp: "2025-04-26T11:10:03Z",
+        },
+        {
+            id: 4,
+            text: "Can we have a breakdown of the budget by department?",
+            timestamp: "2025-04-26T11:10:02Z",
+        },
+        {
+            id: 5,
+            text: "I absolutely hate this entire budget!",
+            timestamp: "2025-04-26T11:10:00Z",
+        },
+    ];
+
+    const [commentSentiments, setCommentSentiments] = useState<
+        Record<number, string>
+    >({});
+
+    useEffect(() => {
+        const fetchSentiments = async () => {
+            const sentiments: Record<number, string> = {};
+            for (const comment of comments) {
+                const sentimentData = await getSentiment({
+                    commentMess: comment.text,
+                });
+                sentiments[comment.id] =
+                    sentimentData?.sentiment || "Loading Sentiment...";
+            }
+            setCommentSentiments(sentiments);
+        };
+
+        fetchSentiments();
+    }, []);
 
     const [budgetEntries, setBudgetEntries] = useState<
         {
@@ -244,10 +311,13 @@ const Public = () => {
                     onValueChange={setActiveTab}
                     className="w-full"
                 >
-                    <TabsList className="grid grid-cols-3 w-full max-w-3xl mb-8">
+                    <TabsList className="grid grid-cols-4 w-full max-w-3xl mb-8">
                         <TabsTrigger value="overview">Overview</TabsTrigger>
                         <TabsTrigger value="geographic">Geographic</TabsTrigger>
                         <TabsTrigger value="temporal">Temporal</TabsTrigger>
+                        <TabsTrigger value="sentiment">
+                            Community Sentiment
+                        </TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="overview">
@@ -528,74 +598,133 @@ const Public = () => {
                         </div>
                     </TabsContent>
 
-                    <TabsContent value="geographic">
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <Card className="lg:col-span-2">
-                                <CardHeader>
-                                    <CardTitle>
-                                        Geographic Budget Distribution
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Interactive map with time scrubbing
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="h-[500px]">
-                                    <TimeScrubbingMap />
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>District Breakdown</CardTitle>
-                                    <CardDescription>
-                                        Budget allocation by district
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    {[
-                                        "Downtown",
-                                        "Westside",
-                                        "Eastside",
-                                        "Northside",
-                                        "Southside",
-                                    ].map((district) => (
-                                        <div
-                                            key={district}
-                                            className="flex justify-between items-center"
-                                        >
-                                            <div>
-                                                <p className="font-medium">
-                                                    {district}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    Various projects
-                                                </p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="font-medium">
-                                                    $
-                                                    {(
-                                                        Math.random() * 800000 +
-                                                        200000
-                                                    )
-                                                        .toFixed(0)
-                                                        .replace(
-                                                            /\B(?=(\d{3})+(?!\d))/g,
-                                                            ","
-                                                        )}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {Math.floor(
-                                                        Math.random() * 20
-                                                    ) + 5}{" "}
-                                                    projects
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </CardContent>
-                            </Card>
+                    <TabsContent value="sentiment">
+                        <div className="space-y-2">
+                            {comments.map((comment) => (
+                                <div
+                                    key={comment.id}
+                                    className="p-3 border rounded-md shadow-sm bg-muted"
+                                >
+                                    <p className="text-xs text-muted-foreground">
+                                        {new Date(
+                                            comment.timestamp
+                                        ).toLocaleString()}
+                                    </p>
+                                    <p className="mt-1 text-sm">
+                                        {comment.text}
+                                    </p>
+                                    <span
+                                        className={`inline-block mt-1 px-2 py-0.5 text-xs font-semibold rounded ${
+                                            commentSentiments[comment.id] ===
+                                            "Positive"
+                                                ? "bg-green-100 text-green-800"
+                                                : commentSentiments[
+                                                      comment.id
+                                                  ] === "Negative"
+                                                ? "bg-red-100 text-red-800"
+                                                : "bg-gray-100 text-gray-800"
+                                        }`}
+                                    >
+                                        {commentSentiments[comment.id] ||
+                                            "Unknown"}
+                                    </span>
+                                </div>
+                            ))}
+                            <div className="mt-2">
+                                <input
+                                    type="text"
+                                    placeholder="Add your comment..."
+                                    className="w-full p-2 border rounded-md text-sm"
+                                    onKeyDown={async (e) => {
+                                        if (e.key === "Enter") {
+                                            const newComment = {
+                                                id: comments.length + 1,
+                                                text: e.currentTarget.value,
+                                                timestamp:
+                                                    new Date().toISOString(),
+                                            };
+                                            comments.push(newComment);
+                                            const sentimentData =
+                                                await getSentiment({
+                                                    commentMess:
+                                                        newComment.text,
+                                                });
+                                            setCommentSentiments((prev) => ({
+                                                ...prev,
+                                                [newComment.id]:
+                                                    sentimentData?.sentiment ||
+                                                    "Unknown",
+                                            }));
+                                            e.currentTarget.value = "";
+                                        }
+                                    }}
+                                />
+                            </div>
                         </div>
+                    </TabsContent>
+
+                    <TabsContent value="geographic">
+                        <Card className="lg:col-span-2">
+                            <CardHeader>
+                                <CardTitle>
+                                    Geographic Budget Distribution
+                                </CardTitle>
+                                <CardDescription>
+                                    Interactive map with time scrubbing
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="h-[600px]">
+                                <TimeScrubbingMap />
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Category Breakdown</CardTitle>
+                                <CardDescription>
+                                    Budget allocation by category
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="max-h-[calc(100vh-500px)] overflow-y-auto space-y-4">
+                                    {Object.entries(
+                                        budgetEntries.reduce((acc, entry) => {
+                                            acc[entry.subcategory] =
+                                                (acc[entry.subcategory] || 0) +
+                                                entry.amount_usd;
+                                            return acc;
+                                        }, {} as Record<string, number>)
+                                    )
+                                        .sort((a, b) => b[1] - a[1])
+                                        .map(([subcategory, amount]) => (
+                                            <div
+                                                key={subcategory}
+                                                className="flex justify-between items-center p-3 bg-muted rounded-lg shadow-sm"
+                                            >
+                                                <div>
+                                                    <p className="font-semibold text-primary">
+                                                        {subcategory}
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        Budget allocation
+                                                    </p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="font-bold text-lg text-secondary">
+                                                        $
+                                                        {amount
+                                                            .toFixed(0)
+                                                            .replace(
+                                                                /\B(?=(\d{3})+(?!\d))/g,
+                                                                ","
+                                                            )}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            </CardContent>
+                        </Card>
                     </TabsContent>
 
                     <TabsContent value="temporal">
