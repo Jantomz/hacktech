@@ -46,7 +46,7 @@ const RAGBot: React.FC = () => {
     };
 
     return (
-        <div className="fixed bottom-6 right-6">
+        <div className="fixed bottom-6 right-6 z-40">
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-5 py-3 rounded-full shadow-lg hover:from-blue-600 hover:to-indigo-600 focus:outline-none transition-all duration-300"

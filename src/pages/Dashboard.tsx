@@ -574,7 +574,7 @@ const Dashboard = () => {
                                         Interactive map with time scrubbing
                                     </CardDescription>
                                 </CardHeader>
-                                <CardContent className="h-[500px]">
+                                <CardContent className="h-[600px]">
                                     <TimeScrubbingMap />
                                 </CardContent>
                             </Card>
